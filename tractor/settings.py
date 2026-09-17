@@ -3,9 +3,12 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from urllib.parse import urlsplit
 
+from tractor.core.convergence import Budget
 from tractor.core.deduplication import normalize_url
+from tractor.credentials import redact
 from tractor.network.tor import onion_host, validate_proxy
 from tractor.sources import default_adapters
+from tractor.sources.base import SearchOptions
 from tractor.storage.atomic import atomic_text
 
 
@@ -58,7 +61,10 @@ class Settings:
     tor_proxy: str = ""
     tor_autostart: bool = True
     onion_endpoint: str = ""
-    schema_version: int = 3
+    schema_version: int = 4
+    search: SearchOptions = field(default_factory=SearchOptions)
+    budget: Budget = field(default_factory=Budget)
+    profile: str = "Custom"
 
     @classmethod
     def load(cls, data_dir: Path) -> "Settings":
@@ -68,7 +74,11 @@ class Settings:
             onion = validate_onion_endpoint(data.get("onion_endpoint", ""))
             proxy = validate_proxy(data.get("tor_proxy", ""))
             defaults = {a.id for a in default_adapters()}
-            valid = defaults | {"torch"} | ({"searxng"} if endpoint else set())
+            valid = (
+                defaults
+                | {"torch", "brave", "mojeek", "kagi", "marginalia", "common_crawl"}
+                | ({"searxng"} if endpoint else set())
+            )
             valid |= {"onion_searxng"} if onion else set()
             selected = list(dict.fromkeys(key for key in data.get("sources", []) if key in valid))
             # Add the new default to an unchanged old default selection, preserving custom choices.
@@ -80,6 +90,9 @@ class Settings:
                 proxy,
                 data.get("tor_autostart", True) is True,
                 onion,
+                search=SearchOptions(**data.get("search", {})),
+                budget=Budget(**data.get("budget", {})),
+                profile=data.get("profile", "Custom"),
             )
         except (OSError, ValueError, TypeError, AttributeError):
             return cls()
@@ -90,7 +103,7 @@ class Settings:
         self.tor_proxy = validate_proxy(self.tor_proxy)
         data_dir.mkdir(parents=True, exist_ok=True, mode=0o700)
         with atomic_text(data_dir / "settings.json") as file:
-            json.dump(asdict(self), file, indent=2)
+            json.dump(redact(asdict(self)), file, indent=2)
 
     @property
     def allowed_origins(self) -> frozenset[str]:

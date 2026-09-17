@@ -1,14 +1,16 @@
 import html
+import json
 import re
 from pathlib import Path
 from urllib.parse import quote
 
 from tractor.core.models import Investigation
+from tractor.credentials import redact
 from tractor.storage.atomic import atomic_text
 
 
 def escaped(value: object) -> str:
-    text = html.escape(str(value), quote=False)
+    text = html.escape(redact(str(value)), quote=False)
     return re.sub(r"([\\`*_{}\[\]()#!|>])", r"\\\1", text).replace("\n", " ")
 
 
@@ -32,7 +34,7 @@ def export_markdown(inv: Investigation, path: Path) -> None:
     lines += [f"- {key.replace('_', ' ')}: {escaped(value)}" for key, value in inv.coverage.items()]
     lines += ["", "## Sources and evidence trails", ""]
     for result in inv.unique_results:
-        url = quote(result.url, safe=":/?=&%+#@~;,")
+        url = quote(redact(result.url), safe=":/?=&%+#@~;,")
         lines += [
             f"### {escaped(result.title)}",
             "",
@@ -47,6 +49,8 @@ def export_markdown(inv: Investigation, path: Path) -> None:
             "Discovery trail: " + " → ".join(result.discovery_path),
             "",
             "Matched queries: " + escaped("; ".join(result.matched_queries)),
+            "",
+            "Discovery metadata: " + escaped(json.dumps(result.metadata, ensure_ascii=False)),
             "",
         ]
     lines += ["## Query variants", ""]
@@ -89,4 +93,20 @@ def export_markdown(inv: Investigation, path: Path) -> None:
         for task in inv.pending_tasks
     ]
     with atomic_text(path) as file:
-        file.write("\n".join(lines) + "\n")
+        lines += [
+            "",
+            "## Provider configuration and local health",
+            "",
+            escaped(
+                json.dumps(
+                    {
+                        "profile": inv.profile,
+                        "search_options": inv.search_options,
+                        "provider_configuration": inv.provider_configuration,
+                        "provider_health": inv.provider_health,
+                    },
+                    ensure_ascii=False,
+                )
+            ),
+        ]
+        file.write(redact("\n".join(lines) + "\n"))

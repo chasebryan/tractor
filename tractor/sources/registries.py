@@ -13,7 +13,10 @@ class Wikidata:
     )
 
     async def search(self, query: QueryVariant, context: SearchContext) -> SearchBatch:
-        language = query.language if query.language in context.languages else "en"
+        requested = (
+            query.language if context.requested_language == "auto" else context.requested_language
+        )
+        language = requested if requested in context.languages else "en"
         context.search_language = language
         data = await context.client.get_json(
             "https://www.wikidata.org/w/api.php",

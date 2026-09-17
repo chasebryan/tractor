@@ -1,4 +1,16 @@
+import math
 from dataclasses import dataclass
+
+BUDGET_LIMITS = {
+    "max_passes": (1, 8),
+    "max_variants": (1, 100),
+    "max_jobs": (1, 1000),
+    "max_results_per_query": (1, 100),
+    "max_seconds": (0.01, 3600),
+    "concurrency": (1, 12),
+    "max_pages_per_query": (1, 100),
+    "max_results": (1, 10000),
+}
 
 
 @dataclass(frozen=True)
@@ -13,20 +25,16 @@ class Budget:
     max_results: int = 3000
 
     def __post_init__(self) -> None:
-        if any(
-            v <= 0
-            for v in (
-                self.max_passes,
-                self.max_variants,
-                self.max_jobs,
-                self.max_results_per_query,
-                self.max_seconds,
-                self.concurrency,
-                self.max_pages_per_query,
-                self.max_results,
-            )
-        ):
-            raise ValueError("Investigation budgets must be positive.")
+        for name, (low, high) in BUDGET_LIMITS.items():
+            value = getattr(self, name)
+            if (
+                type(value) not in (int, float)
+                or not math.isfinite(value)
+                or not low <= value <= high
+                or name != "max_seconds"
+                and type(value) is not int
+            ):
+                raise ValueError(f"{name} must be positive and between {low} and {high}.")
 
 
 def convergence_reason(

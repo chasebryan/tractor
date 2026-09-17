@@ -4,7 +4,7 @@ TRACTOR discovers and correlates publicly accessible information. It does not im
 
 ## Trust boundaries
 
-All provider content is untrusted data. Result cards explicitly use Qt plain-text labels. Previews use read-only text widgets without an HTML or JavaScript engine. Metadata APIs accept at most 4 MiB of JSON; the Tor HTML path accepts at most 2 MiB of decoded text. HTML is parsed into plain-text snippets with Beautiful Soup; it never executes returned content, opens a binary, loads a remote image, or fetches a result URL automatically. The user can explicitly open an HTTP(S) source in an external browser, which applies its own policies.
+All provider content is untrusted data. Result cards explicitly use Qt plain-text labels. Previews use read-only text widgets without an HTML or JavaScript engine. Metadata APIs accept at most 4 MiB of decoded JSON/NDJSON; the Tor HTML path accepts at most 2 MiB of decoded text. HTML is parsed into plain-text snippets with Beautiful Soup; it never executes returned content, opens a binary, loads a remote image, or fetches a result URL automatically. The user can explicitly open an HTTP(S) source in an external browser, which applies its own policies.
 
 The API client validates URLs and redirects against an explicit host allowlist, rejects URL credentials and nonstandard remote ports for built-in APIs, requires HTTPS for clearnet APIs, disables environment-provided proxies, and separates clearnet from Tor. An explicitly configured SearxNG server registers only its exact origin (scheme, host, and port); HTTP is permitted only for a loopback server. A configured server and its upstream search engines receive the user's queries. Changing servers does not silently reuse a saved page cursor against a different server. Tor uses `socks5h` for remote DNS, validates v3 onion checksums, and accepts only registered onion hosts on standard ports. Redirects cannot escape that context; there is no clearnet fallback. The built-in Torch index and an optional user-configured onion SearxNG server use this path. No retrieved result URL is fetched automatically. Onion links are shown for the user to open in Tor Browser, never passed automatically to the ordinary browser. Do not turn a provider-returned URL into a network target without an appropriate policy.
 
@@ -16,7 +16,23 @@ SQLite queries are parameterized. Source content cannot choose local filenames o
 
 Rate limits, deadlines, concurrency limits, pass/query limits, bounded responses, and cache expiry limit resource use. Near-duplicate matching is bounded to the initial text segment. Future PDF/document parsers should run with process-level resource constraints before accepting downloads. Current adapters retain publication or catalog metadata rather than extracting full documents.
 
-The local database and cache are unencrypted. Exports include investigation queries and source material. The app stores no API credentials and does not log full queries or provider error bodies. Provider authors must not place credentials in result metadata, exception messages, or logging fields.
+The local database and cache are unencrypted. Exports include investigation queries and source material. The app persists no API credentials and does not log full queries or provider error bodies. Provider authors must not place credentials in result metadata, exception messages, or logging fields.
+
+## Search APIs and credentials
+
+Brave, Mojeek, Kagi and Marginalia use fixed registered HTTPS endpoints. Authentication is loaded from environment variables or the injectable secure-store interface. Environment values take precedence. No OS keychain entry UI is shipped. Keys are never serialized into settings or SQLite. All authenticated redirects are refused, even on the same origin. Mojeek requires a query-string key under its documented HTTPS contract; application errors never contain the full authenticated URL. Private response caches are memory-only, bounded to 32 entries and at most 15 minutes, scoped by route/provider/query/account, and cleared when the session closes. Server no-cache/no-store/max-age policies are honored. Public caches remain local and bounded.
+
+Known credential strings and URL-encoded forms are redacted from provider echoes, metadata, SQLite projections/history, JSON/CSV/Markdown exports and application logs. This is a defense in depth, not permission for provider code to intentionally embed secrets. Arbitrary third-party logging or host compromise is outside this boundary. Do not attach unredacted diagnostics to public issues. Provider plans and returned licenses can restrict retention; Mojeek requires an explicit storage-eligible setting. Native ranks, timestamps and raw provider metadata remain untrusted data.
+
+Common Crawl only contacts its fixed index host, validates collection IDs and queries capture metadata. Returned endpoint URLs are not followed; WARC filenames/offsets are stored as metadata and never opened. The index can label JSON with text/x-cdxj: JSON structure is still validated before use. Capture time is not publication time. Generic keywords are skipped explicitly.
+
+## Deferred retrieval and inference boundaries
+
+There is no arbitrary clearnet document-fetch subsystem, DNS/public-IP validation layer for arbitrary targets, PDF parser, automatic claim extractor or identity-resolution engine in 0.4. Do not describe the existing API allowlist as protection for a future arbitrary crawler. Before adding one, validate public IPs and DNS results at every redirect, prevent DNS rebinding/private-network requests, strip credentials, obey robots, enforce byte/MIME/deadline limits and isolate PDF parsing in a resource-limited process. User-configured SearxNG origins are trusted explicit destinations, including loopback servers; they are not arbitrary provider-supplied destinations.
+
+Duplicate/index agreement is discovery metadata, not factual corroboration. Mechanical queries and source label candidates remain unverified. Shared domains only produce hosted-at observations. Archive metadata neither proves historical content nor constitutes an independent factual source. Claim/source-independence and contradiction analysis must retain these distinctions in future releases.
+
+Provider health is a local bounded table with no telemetry. Changing credentials or query settings invalidates relevant saved provider identities; use Refresh rather than silently reusing incompatible cursors. Maximum coverage raises only validated resource budgets and never disables routing, response size, or cancellation boundaries.
 
 ## Changes requiring special review
 

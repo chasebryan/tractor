@@ -1,5 +1,6 @@
 import asyncio
 import threading
+from dataclasses import asdict
 from pathlib import Path
 
 from PySide6.QtCore import QThread, Signal
@@ -8,6 +9,7 @@ from tractor.core.engine import InvestigationEngine
 from tractor.network.session import configured_adapters, network_session
 from tractor.settings import Settings
 from tractor.sources import default_adapters
+from tractor.sources.catalog import configuration
 from tractor.storage.cache import ResponseCache
 from tractor.storage.database import Database
 
@@ -29,8 +31,10 @@ class InvestigationWorker(QThread):
         onion_endpoint: str = "",
         resume_id: str | None = None,
         previous_id: str | None = None,
+        settings: Settings | None = None,
     ):
         super().__init__(parent)
+        self.settings = settings
         self.query = query
         self.db_path = db_path
         self.enabled_sources = enabled_sources
@@ -56,7 +60,7 @@ class InvestigationWorker(QThread):
 
     async def investigate(self) -> None:
         with Database(self.db_path) as database:
-            settings = Settings(
+            settings = self.settings or Settings(
                 self.enabled_sources,
                 self.web_endpoint,
                 self.tor_proxy,
@@ -78,6 +82,10 @@ class InvestigationWorker(QThread):
                     on_event=self.event.emit,
                     cancelled=self.cancelled,
                     network_contexts=contexts,
+                    budget=settings.budget,
+                    provider_configuration=configuration(settings, self.enabled_sources),
+                    search_options=asdict(settings.search),
+                    profile=settings.profile,
                 )
                 await engine.run(
                     self.query,

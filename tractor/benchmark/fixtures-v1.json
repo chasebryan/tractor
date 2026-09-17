@@ -1,0 +1,2882 @@
+{
+  "schema_version": 1,
+  "fixture_version": "1.0.0",
+  "description": "Original synthetic records and explicit relevance judgments; hard negatives intentionally share names. No claims of real-world identity or exhaustive recall.",
+  "minimum_metrics": {
+    "recall_at_10": 0.98,
+    "recall_at_50": 0.98,
+    "mrr": 0.71,
+    "ndcg_at_10": 0.79,
+    "dedup_precision": 1.0,
+    "dedup_recall": 1.0,
+    "candidate_precision": 0.84
+  },
+  "cases": [
+    {
+      "id": "person-collision",
+      "query": "Mara Chen",
+      "tags": [
+        "person",
+        "name_collision"
+      ],
+      "source_aliases": [],
+      "acceptable_candidates": [
+        "M. Chen",
+        "\"Mara Chen\""
+      ],
+      "records": [
+        {
+          "id": "c00a",
+          "title": "Mara Chen — source record",
+          "url": "https://primary-0.example/report",
+          "source_type": "DOCUMENT",
+          "source_provider": "brave",
+          "original_text": "A geologist named Mara Chen studies ancient coastlines.",
+          "original_language": "en",
+          "matched_queries": [
+            "Mara Chen"
+          ],
+          "duplicate_group": "c00a"
+        },
+        {
+          "id": "c00b",
+          "title": "Mara Chen — source record",
+          "url": "https://primary-0.example/report?utm_source=mirror",
+          "source_type": "DOCUMENT",
+          "source_provider": "mojeek",
+          "original_text": "A geologist named Mara Chen studies ancient coastlines.",
+          "original_language": "en",
+          "matched_queries": [
+            "Mara Chen"
+          ],
+          "duplicate_group": "c00a"
+        },
+        {
+          "id": "c00c",
+          "title": "Independent methods and observations",
+          "url": "https://methods-0.example/data",
+          "source_type": "DOCUMENT",
+          "source_provider": "marginalia",
+          "original_text": "A geologist named Mara Chen studies ancient coastlines. Supplementary methods and measurement notes.",
+          "original_language": "en",
+          "matched_queries": [
+            "Mara Chen"
+          ]
+        },
+        {
+          "id": "c00d",
+          "title": "Mara Chen",
+          "url": "https://unrelated-0.example/page",
+          "source_type": "WEB",
+          "source_provider": "kagi",
+          "original_text": "An unrelated artist Mara Chen sells portraits.",
+          "original_language": "en",
+          "matched_queries": [
+            "Mara Chen"
+          ]
+        },
+        {
+          "id": "c00noise0",
+          "title": "Cooking guide 0",
+          "url": "https://distractor-0-0.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c00noise1",
+          "title": "Travel diary 1",
+          "url": "https://distractor-0-1.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c00noise2",
+          "title": "Computer parts 2",
+          "url": "https://distractor-0-2.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c00noise3",
+          "title": "Garden flowers 3",
+          "url": "https://distractor-0-3.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c00noise4",
+          "title": "Cooking guide 4",
+          "url": "https://distractor-0-4.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c00noise5",
+          "title": "Travel diary 5",
+          "url": "https://distractor-0-5.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c00noise6",
+          "title": "Computer parts 6",
+          "url": "https://distractor-0-6.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c00noise7",
+          "title": "Garden flowers 7",
+          "url": "https://distractor-0-7.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c00noise8",
+          "title": "Cooking guide 8",
+          "url": "https://distractor-0-8.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c00noise9",
+          "title": "Travel diary 9",
+          "url": "https://distractor-0-9.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c00noise10",
+          "title": "Computer parts 10",
+          "url": "https://distractor-0-10.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c00noise11",
+          "title": "Garden flowers 11",
+          "url": "https://distractor-0-11.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        }
+      ],
+      "judgments": {
+        "c00a": 3,
+        "c00c": 2,
+        "c00d": 0
+      }
+    },
+    {
+      "id": "company-collision",
+      "query": "Northstar Ltd",
+      "tags": [
+        "company",
+        "ambiguous_name"
+      ],
+      "source_aliases": [],
+      "acceptable_candidates": [
+        "Northstar Limited",
+        "N. Ltd",
+        "\"Northstar Ltd\""
+      ],
+      "records": [
+        {
+          "id": "c01a",
+          "title": "Northstar Ltd — source record",
+          "url": "https://primary-1.example/report",
+          "source_type": "REGISTRY",
+          "source_provider": "brave",
+          "original_text": "Northstar Ltd registered a solar research laboratory.",
+          "original_language": "en",
+          "matched_queries": [
+            "Northstar Ltd"
+          ],
+          "duplicate_group": "c01a"
+        },
+        {
+          "id": "c01b",
+          "title": "Northstar Ltd — source record",
+          "url": "https://primary-1.example/report?utm_source=mirror",
+          "source_type": "REGISTRY",
+          "source_provider": "mojeek",
+          "original_text": "Northstar Ltd registered a solar research laboratory.",
+          "original_language": "en",
+          "matched_queries": [
+            "Northstar Ltd"
+          ],
+          "duplicate_group": "c01a"
+        },
+        {
+          "id": "c01c",
+          "title": "Independent methods and observations",
+          "url": "https://methods-1.example/data",
+          "source_type": "REGISTRY",
+          "source_provider": "marginalia",
+          "original_text": "Northstar Ltd registered a solar research laboratory. Supplementary methods and measurement notes.",
+          "original_language": "en",
+          "matched_queries": [
+            "Northstar Ltd"
+          ]
+        },
+        {
+          "id": "c01d",
+          "title": "Northstar Ltd",
+          "url": "https://unrelated-1.example/page",
+          "source_type": "WEB",
+          "source_provider": "kagi",
+          "original_text": "Northstar Ltd is a separate freight company.",
+          "original_language": "en",
+          "matched_queries": [
+            "Northstar Ltd"
+          ]
+        },
+        {
+          "id": "c01noise0",
+          "title": "Cooking guide 0",
+          "url": "https://distractor-1-0.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c01noise1",
+          "title": "Travel diary 1",
+          "url": "https://distractor-1-1.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c01noise2",
+          "title": "Computer parts 2",
+          "url": "https://distractor-1-2.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c01noise3",
+          "title": "Garden flowers 3",
+          "url": "https://distractor-1-3.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c01noise4",
+          "title": "Cooking guide 4",
+          "url": "https://distractor-1-4.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c01noise5",
+          "title": "Travel diary 5",
+          "url": "https://distractor-1-5.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c01noise6",
+          "title": "Computer parts 6",
+          "url": "https://distractor-1-6.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c01noise7",
+          "title": "Garden flowers 7",
+          "url": "https://distractor-1-7.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c01noise8",
+          "title": "Cooking guide 8",
+          "url": "https://distractor-1-8.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c01noise9",
+          "title": "Travel diary 9",
+          "url": "https://distractor-1-9.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c01noise10",
+          "title": "Computer parts 10",
+          "url": "https://distractor-1-10.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c01noise11",
+          "title": "Garden flowers 11",
+          "url": "https://distractor-1-11.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        }
+      ],
+      "judgments": {
+        "c01a": 3,
+        "c01c": 2,
+        "c01d": 0
+      }
+    },
+    {
+      "id": "russian-alias",
+      "query": "Полярный институт",
+      "tags": [
+        "multilingual",
+        "cyrillic"
+      ],
+      "source_aliases": [
+        "Polar Institute"
+      ],
+      "acceptable_candidates": [
+        "Poliarnyi institut"
+      ],
+      "records": [
+        {
+          "id": "c02a",
+          "title": "Полярный институт — source record",
+          "url": "https://primary-2.example/report",
+          "source_type": "DOCUMENT",
+          "source_provider": "brave",
+          "original_text": "Полярный институт изучает климат Арктики.",
+          "original_language": "ru",
+          "matched_queries": [
+            "Полярный институт"
+          ],
+          "duplicate_group": "c02a"
+        },
+        {
+          "id": "c02b",
+          "title": "Полярный институт — source record",
+          "url": "https://primary-2.example/report?utm_source=mirror",
+          "source_type": "DOCUMENT",
+          "source_provider": "mojeek",
+          "original_text": "Полярный институт изучает климат Арктики.",
+          "original_language": "ru",
+          "matched_queries": [
+            "Полярный институт"
+          ],
+          "duplicate_group": "c02a"
+        },
+        {
+          "id": "c02c",
+          "title": "Independent methods and observations",
+          "url": "https://methods-2.example/data",
+          "source_type": "DOCUMENT",
+          "source_provider": "marginalia",
+          "original_text": "Полярный институт изучает климат Арктики. Supplementary methods and measurement notes.",
+          "original_language": "ru",
+          "matched_queries": [
+            "Полярный институт"
+          ]
+        },
+        {
+          "id": "c02d",
+          "title": "Полярный институт",
+          "url": "https://unrelated-2.example/page",
+          "source_type": "WEB",
+          "source_provider": "kagi",
+          "original_text": "Полярный институт спорта проводит тренировки.",
+          "original_language": "ru",
+          "matched_queries": [
+            "Полярный институт"
+          ]
+        },
+        {
+          "id": "c02noise0",
+          "title": "Cooking guide 0",
+          "url": "https://distractor-2-0.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c02noise1",
+          "title": "Travel diary 1",
+          "url": "https://distractor-2-1.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c02noise2",
+          "title": "Computer parts 2",
+          "url": "https://distractor-2-2.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c02noise3",
+          "title": "Garden flowers 3",
+          "url": "https://distractor-2-3.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c02noise4",
+          "title": "Cooking guide 4",
+          "url": "https://distractor-2-4.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c02noise5",
+          "title": "Travel diary 5",
+          "url": "https://distractor-2-5.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c02noise6",
+          "title": "Computer parts 6",
+          "url": "https://distractor-2-6.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c02noise7",
+          "title": "Garden flowers 7",
+          "url": "https://distractor-2-7.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c02noise8",
+          "title": "Cooking guide 8",
+          "url": "https://distractor-2-8.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c02noise9",
+          "title": "Travel diary 9",
+          "url": "https://distractor-2-9.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c02noise10",
+          "title": "Computer parts 10",
+          "url": "https://distractor-2-10.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c02noise11",
+          "title": "Garden flowers 11",
+          "url": "https://distractor-2-11.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c02alias",
+          "title": "Polar Institute",
+          "url": "https://registry-2.example/label",
+          "source_type": "DATASET",
+          "source_provider": "wikidata",
+          "original_text": "A source-backed alternate label for this synthetic fixture.",
+          "original_language": "en",
+          "matched_queries": [
+            "Polar Institute"
+          ]
+        }
+      ],
+      "judgments": {
+        "c02a": 3,
+        "c02c": 2,
+        "c02d": 0,
+        "c02alias": 2
+      }
+    },
+    {
+      "id": "arabic-name",
+      "query": "مركز الدراسات البحرية",
+      "tags": [
+        "multilingual",
+        "arabic"
+      ],
+      "source_aliases": [],
+      "acceptable_candidates": [],
+      "records": [
+        {
+          "id": "c03a",
+          "title": "مركز الدراسات البحرية — source record",
+          "url": "https://primary-3.example/report",
+          "source_type": "DOCUMENT",
+          "source_provider": "brave",
+          "original_text": "مركز الدراسات البحرية ينشر نتائج الأبحاث.",
+          "original_language": "ar",
+          "matched_queries": [
+            "مركز الدراسات البحرية"
+          ],
+          "duplicate_group": "c03a"
+        },
+        {
+          "id": "c03b",
+          "title": "مركز الدراسات البحرية — source record",
+          "url": "https://primary-3.example/report?utm_source=mirror",
+          "source_type": "DOCUMENT",
+          "source_provider": "mojeek",
+          "original_text": "مركز الدراسات البحرية ينشر نتائج الأبحاث.",
+          "original_language": "ar",
+          "matched_queries": [
+            "مركز الدراسات البحرية"
+          ],
+          "duplicate_group": "c03a"
+        },
+        {
+          "id": "c03c",
+          "title": "Independent methods and observations",
+          "url": "https://methods-3.example/data",
+          "source_type": "DOCUMENT",
+          "source_provider": "marginalia",
+          "original_text": "مركز الدراسات البحرية ينشر نتائج الأبحاث. Supplementary methods and measurement notes.",
+          "original_language": "ar",
+          "matched_queries": [
+            "مركز الدراسات البحرية"
+          ]
+        },
+        {
+          "id": "c03d",
+          "title": "مركز الدراسات البحرية",
+          "url": "https://unrelated-3.example/page",
+          "source_type": "WEB",
+          "source_provider": "kagi",
+          "original_text": "مركز الدراسات البحرية يقدم متجرًا غير ذي صلة.",
+          "original_language": "ar",
+          "matched_queries": [
+            "مركز الدراسات البحرية"
+          ]
+        },
+        {
+          "id": "c03noise0",
+          "title": "Cooking guide 0",
+          "url": "https://distractor-3-0.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c03noise1",
+          "title": "Travel diary 1",
+          "url": "https://distractor-3-1.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c03noise2",
+          "title": "Computer parts 2",
+          "url": "https://distractor-3-2.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c03noise3",
+          "title": "Garden flowers 3",
+          "url": "https://distractor-3-3.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c03noise4",
+          "title": "Cooking guide 4",
+          "url": "https://distractor-3-4.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c03noise5",
+          "title": "Travel diary 5",
+          "url": "https://distractor-3-5.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c03noise6",
+          "title": "Computer parts 6",
+          "url": "https://distractor-3-6.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c03noise7",
+          "title": "Garden flowers 7",
+          "url": "https://distractor-3-7.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c03noise8",
+          "title": "Cooking guide 8",
+          "url": "https://distractor-3-8.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c03noise9",
+          "title": "Travel diary 9",
+          "url": "https://distractor-3-9.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c03noise10",
+          "title": "Computer parts 10",
+          "url": "https://distractor-3-10.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c03noise11",
+          "title": "Garden flowers 11",
+          "url": "https://distractor-3-11.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        }
+      ],
+      "judgments": {
+        "c03a": 3,
+        "c03c": 2,
+        "c03d": 0
+      }
+    },
+    {
+      "id": "chinese-name",
+      "query": "海洋研究所",
+      "tags": [
+        "multilingual",
+        "han"
+      ],
+      "source_aliases": [],
+      "acceptable_candidates": [
+        "Hai Yang Yan Jiu Suo"
+      ],
+      "records": [
+        {
+          "id": "c04a",
+          "title": "海洋研究所 — source record",
+          "url": "https://primary-4.example/report",
+          "source_type": "DOCUMENT",
+          "source_provider": "brave",
+          "original_text": "海洋研究所发布海洋科学研究报告。",
+          "original_language": "zh",
+          "matched_queries": [
+            "海洋研究所"
+          ],
+          "duplicate_group": "c04a"
+        },
+        {
+          "id": "c04b",
+          "title": "海洋研究所 — source record",
+          "url": "https://primary-4.example/report?utm_source=mirror",
+          "source_type": "DOCUMENT",
+          "source_provider": "mojeek",
+          "original_text": "海洋研究所发布海洋科学研究报告。",
+          "original_language": "zh",
+          "matched_queries": [
+            "海洋研究所"
+          ],
+          "duplicate_group": "c04a"
+        },
+        {
+          "id": "c04c",
+          "title": "Independent methods and observations",
+          "url": "https://methods-4.example/data",
+          "source_type": "DOCUMENT",
+          "source_provider": "marginalia",
+          "original_text": "海洋研究所发布海洋科学研究报告。 Supplementary methods and measurement notes.",
+          "original_language": "zh",
+          "matched_queries": [
+            "海洋研究所"
+          ]
+        },
+        {
+          "id": "c04d",
+          "title": "海洋研究所",
+          "url": "https://unrelated-4.example/page",
+          "source_type": "WEB",
+          "source_provider": "kagi",
+          "original_text": "海洋研究所品牌商店出售玩具。",
+          "original_language": "zh",
+          "matched_queries": [
+            "海洋研究所"
+          ]
+        },
+        {
+          "id": "c04noise0",
+          "title": "Cooking guide 0",
+          "url": "https://distractor-4-0.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c04noise1",
+          "title": "Travel diary 1",
+          "url": "https://distractor-4-1.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c04noise2",
+          "title": "Computer parts 2",
+          "url": "https://distractor-4-2.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c04noise3",
+          "title": "Garden flowers 3",
+          "url": "https://distractor-4-3.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c04noise4",
+          "title": "Cooking guide 4",
+          "url": "https://distractor-4-4.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c04noise5",
+          "title": "Travel diary 5",
+          "url": "https://distractor-4-5.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c04noise6",
+          "title": "Computer parts 6",
+          "url": "https://distractor-4-6.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c04noise7",
+          "title": "Garden flowers 7",
+          "url": "https://distractor-4-7.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c04noise8",
+          "title": "Cooking guide 8",
+          "url": "https://distractor-4-8.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c04noise9",
+          "title": "Travel diary 9",
+          "url": "https://distractor-4-9.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c04noise10",
+          "title": "Computer parts 10",
+          "url": "https://distractor-4-10.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c04noise11",
+          "title": "Garden flowers 11",
+          "url": "https://distractor-4-11.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        }
+      ],
+      "judgments": {
+        "c04a": 3,
+        "c04c": 2,
+        "c04d": 0
+      }
+    },
+    {
+      "id": "japanese-query",
+      "query": "海洋研究センター",
+      "tags": [
+        "multilingual",
+        "japanese"
+      ],
+      "source_aliases": [],
+      "acceptable_candidates": [],
+      "records": [
+        {
+          "id": "c05a",
+          "title": "海洋研究センター — source record",
+          "url": "https://primary-5.example/report",
+          "source_type": "DATASET",
+          "source_provider": "brave",
+          "original_text": "海洋研究センターの公開研究データ。",
+          "original_language": "ja",
+          "matched_queries": [
+            "海洋研究センター"
+          ],
+          "duplicate_group": "c05a"
+        },
+        {
+          "id": "c05b",
+          "title": "海洋研究センター — source record",
+          "url": "https://primary-5.example/report?utm_source=mirror",
+          "source_type": "DATASET",
+          "source_provider": "mojeek",
+          "original_text": "海洋研究センターの公開研究データ。",
+          "original_language": "ja",
+          "matched_queries": [
+            "海洋研究センター"
+          ],
+          "duplicate_group": "c05a"
+        },
+        {
+          "id": "c05c",
+          "title": "Independent methods and observations",
+          "url": "https://methods-5.example/data",
+          "source_type": "DATASET",
+          "source_provider": "marginalia",
+          "original_text": "海洋研究センターの公開研究データ。 Supplementary methods and measurement notes.",
+          "original_language": "ja",
+          "matched_queries": [
+            "海洋研究センター"
+          ]
+        },
+        {
+          "id": "c05d",
+          "title": "海洋研究センター",
+          "url": "https://unrelated-5.example/page",
+          "source_type": "WEB",
+          "source_provider": "kagi",
+          "original_text": "海洋研究センターという架空のゲーム。",
+          "original_language": "ja",
+          "matched_queries": [
+            "海洋研究センター"
+          ]
+        },
+        {
+          "id": "c05noise0",
+          "title": "Cooking guide 0",
+          "url": "https://distractor-5-0.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c05noise1",
+          "title": "Travel diary 1",
+          "url": "https://distractor-5-1.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c05noise2",
+          "title": "Computer parts 2",
+          "url": "https://distractor-5-2.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c05noise3",
+          "title": "Garden flowers 3",
+          "url": "https://distractor-5-3.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c05noise4",
+          "title": "Cooking guide 4",
+          "url": "https://distractor-5-4.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c05noise5",
+          "title": "Travel diary 5",
+          "url": "https://distractor-5-5.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c05noise6",
+          "title": "Computer parts 6",
+          "url": "https://distractor-5-6.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c05noise7",
+          "title": "Garden flowers 7",
+          "url": "https://distractor-5-7.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c05noise8",
+          "title": "Cooking guide 8",
+          "url": "https://distractor-5-8.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c05noise9",
+          "title": "Travel diary 9",
+          "url": "https://distractor-5-9.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c05noise10",
+          "title": "Computer parts 10",
+          "url": "https://distractor-5-10.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c05noise11",
+          "title": "Garden flowers 11",
+          "url": "https://distractor-5-11.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        }
+      ],
+      "judgments": {
+        "c05a": 3,
+        "c05c": 2,
+        "c05d": 0
+      }
+    },
+    {
+      "id": "french-organization",
+      "query": "Institut du Littoral",
+      "tags": [
+        "multilingual",
+        "latin_not_english"
+      ],
+      "source_aliases": [],
+      "acceptable_candidates": [
+        "\"Institut du Littoral\""
+      ],
+      "records": [
+        {
+          "id": "c06a",
+          "title": "Institut du Littoral — source record",
+          "url": "https://primary-6.example/report",
+          "source_type": "DOCUMENT",
+          "source_provider": "brave",
+          "original_text": "Institut du Littoral publie les mesures du niveau de la mer.",
+          "original_language": "fr",
+          "matched_queries": [
+            "Institut du Littoral"
+          ],
+          "duplicate_group": "c06a"
+        },
+        {
+          "id": "c06b",
+          "title": "Institut du Littoral — source record",
+          "url": "https://primary-6.example/report?utm_source=mirror",
+          "source_type": "DOCUMENT",
+          "source_provider": "mojeek",
+          "original_text": "Institut du Littoral publie les mesures du niveau de la mer.",
+          "original_language": "fr",
+          "matched_queries": [
+            "Institut du Littoral"
+          ],
+          "duplicate_group": "c06a"
+        },
+        {
+          "id": "c06c",
+          "title": "Independent methods and observations",
+          "url": "https://methods-6.example/data",
+          "source_type": "DOCUMENT",
+          "source_provider": "marginalia",
+          "original_text": "Institut du Littoral publie les mesures du niveau de la mer. Supplementary methods and measurement notes.",
+          "original_language": "fr",
+          "matched_queries": [
+            "Institut du Littoral"
+          ]
+        },
+        {
+          "id": "c06d",
+          "title": "Institut du Littoral",
+          "url": "https://unrelated-6.example/page",
+          "source_type": "WEB",
+          "source_provider": "kagi",
+          "original_text": "Institut du Littoral est un hôtel fictif.",
+          "original_language": "fr",
+          "matched_queries": [
+            "Institut du Littoral"
+          ]
+        },
+        {
+          "id": "c06noise0",
+          "title": "Cooking guide 0",
+          "url": "https://distractor-6-0.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c06noise1",
+          "title": "Travel diary 1",
+          "url": "https://distractor-6-1.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c06noise2",
+          "title": "Computer parts 2",
+          "url": "https://distractor-6-2.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c06noise3",
+          "title": "Garden flowers 3",
+          "url": "https://distractor-6-3.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c06noise4",
+          "title": "Cooking guide 4",
+          "url": "https://distractor-6-4.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c06noise5",
+          "title": "Travel diary 5",
+          "url": "https://distractor-6-5.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c06noise6",
+          "title": "Computer parts 6",
+          "url": "https://distractor-6-6.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c06noise7",
+          "title": "Garden flowers 7",
+          "url": "https://distractor-6-7.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c06noise8",
+          "title": "Cooking guide 8",
+          "url": "https://distractor-6-8.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c06noise9",
+          "title": "Travel diary 9",
+          "url": "https://distractor-6-9.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c06noise10",
+          "title": "Computer parts 10",
+          "url": "https://distractor-6-10.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c06noise11",
+          "title": "Garden flowers 11",
+          "url": "https://distractor-6-11.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        }
+      ],
+      "judgments": {
+        "c06a": 3,
+        "c06c": 2,
+        "c06d": 0
+      }
+    },
+    {
+      "id": "spanish-name",
+      "query": "Centro del Océano",
+      "tags": [
+        "multilingual",
+        "diacritics"
+      ],
+      "source_aliases": [],
+      "acceptable_candidates": [
+        "Centro del Oceano",
+        "\"Centro del Océano\""
+      ],
+      "records": [
+        {
+          "id": "c07a",
+          "title": "Centro del Océano — source record",
+          "url": "https://primary-7.example/report",
+          "source_type": "DOCUMENT",
+          "source_provider": "brave",
+          "original_text": "Centro del Océano publica observaciones del océano.",
+          "original_language": "es",
+          "matched_queries": [
+            "Centro del Océano"
+          ],
+          "duplicate_group": "c07a"
+        },
+        {
+          "id": "c07b",
+          "title": "Centro del Océano — source record",
+          "url": "https://primary-7.example/report?utm_source=mirror",
+          "source_type": "DOCUMENT",
+          "source_provider": "mojeek",
+          "original_text": "Centro del Océano publica observaciones del océano.",
+          "original_language": "es",
+          "matched_queries": [
+            "Centro del Océano"
+          ],
+          "duplicate_group": "c07a"
+        },
+        {
+          "id": "c07c",
+          "title": "Independent methods and observations",
+          "url": "https://methods-7.example/data",
+          "source_type": "DOCUMENT",
+          "source_provider": "marginalia",
+          "original_text": "Centro del Océano publica observaciones del océano. Supplementary methods and measurement notes.",
+          "original_language": "es",
+          "matched_queries": [
+            "Centro del Océano"
+          ]
+        },
+        {
+          "id": "c07d",
+          "title": "Centro del Océano",
+          "url": "https://unrelated-7.example/page",
+          "source_type": "WEB",
+          "source_provider": "kagi",
+          "original_text": "Centro del Océano vende accesorios de vacaciones.",
+          "original_language": "es",
+          "matched_queries": [
+            "Centro del Océano"
+          ]
+        },
+        {
+          "id": "c07noise0",
+          "title": "Cooking guide 0",
+          "url": "https://distractor-7-0.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c07noise1",
+          "title": "Travel diary 1",
+          "url": "https://distractor-7-1.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c07noise2",
+          "title": "Computer parts 2",
+          "url": "https://distractor-7-2.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c07noise3",
+          "title": "Garden flowers 3",
+          "url": "https://distractor-7-3.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c07noise4",
+          "title": "Cooking guide 4",
+          "url": "https://distractor-7-4.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c07noise5",
+          "title": "Travel diary 5",
+          "url": "https://distractor-7-5.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c07noise6",
+          "title": "Computer parts 6",
+          "url": "https://distractor-7-6.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c07noise7",
+          "title": "Garden flowers 7",
+          "url": "https://distractor-7-7.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c07noise8",
+          "title": "Cooking guide 8",
+          "url": "https://distractor-7-8.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c07noise9",
+          "title": "Travel diary 9",
+          "url": "https://distractor-7-9.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c07noise10",
+          "title": "Computer parts 10",
+          "url": "https://distractor-7-10.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c07noise11",
+          "title": "Garden flowers 11",
+          "url": "https://distractor-7-11.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        }
+      ],
+      "judgments": {
+        "c07a": 3,
+        "c07c": 2,
+        "c07d": 0
+      }
+    },
+    {
+      "id": "german-suffix",
+      "query": "Nordlicht GmbH",
+      "tags": [
+        "company",
+        "suffix"
+      ],
+      "source_aliases": [],
+      "acceptable_candidates": [
+        "Nordlicht Gesellschaft mit beschränkter Haftung",
+        "N. GmbH",
+        "\"Nordlicht GmbH\""
+      ],
+      "records": [
+        {
+          "id": "c08a",
+          "title": "Nordlicht GmbH — source record",
+          "url": "https://primary-8.example/report",
+          "source_type": "REGISTRY",
+          "source_provider": "brave",
+          "original_text": "Nordlicht GmbH veröffentlicht Forschungsergebnisse.",
+          "original_language": "de",
+          "matched_queries": [
+            "Nordlicht GmbH"
+          ],
+          "duplicate_group": "c08a"
+        },
+        {
+          "id": "c08b",
+          "title": "Nordlicht GmbH — source record",
+          "url": "https://primary-8.example/report?utm_source=mirror",
+          "source_type": "REGISTRY",
+          "source_provider": "mojeek",
+          "original_text": "Nordlicht GmbH veröffentlicht Forschungsergebnisse.",
+          "original_language": "de",
+          "matched_queries": [
+            "Nordlicht GmbH"
+          ],
+          "duplicate_group": "c08a"
+        },
+        {
+          "id": "c08c",
+          "title": "Independent methods and observations",
+          "url": "https://methods-8.example/data",
+          "source_type": "REGISTRY",
+          "source_provider": "marginalia",
+          "original_text": "Nordlicht GmbH veröffentlicht Forschungsergebnisse. Supplementary methods and measurement notes.",
+          "original_language": "de",
+          "matched_queries": [
+            "Nordlicht GmbH"
+          ]
+        },
+        {
+          "id": "c08d",
+          "title": "Nordlicht GmbH",
+          "url": "https://unrelated-8.example/page",
+          "source_type": "WEB",
+          "source_provider": "kagi",
+          "original_text": "Nordlicht GmbH ist ein gleichnamiger Sportladen.",
+          "original_language": "de",
+          "matched_queries": [
+            "Nordlicht GmbH"
+          ]
+        },
+        {
+          "id": "c08noise0",
+          "title": "Cooking guide 0",
+          "url": "https://distractor-8-0.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c08noise1",
+          "title": "Travel diary 1",
+          "url": "https://distractor-8-1.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c08noise2",
+          "title": "Computer parts 2",
+          "url": "https://distractor-8-2.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c08noise3",
+          "title": "Garden flowers 3",
+          "url": "https://distractor-8-3.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c08noise4",
+          "title": "Cooking guide 4",
+          "url": "https://distractor-8-4.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c08noise5",
+          "title": "Travel diary 5",
+          "url": "https://distractor-8-5.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c08noise6",
+          "title": "Computer parts 6",
+          "url": "https://distractor-8-6.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c08noise7",
+          "title": "Garden flowers 7",
+          "url": "https://distractor-8-7.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c08noise8",
+          "title": "Cooking guide 8",
+          "url": "https://distractor-8-8.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c08noise9",
+          "title": "Travel diary 9",
+          "url": "https://distractor-8-9.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c08noise10",
+          "title": "Computer parts 10",
+          "url": "https://distractor-8-10.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c08noise11",
+          "title": "Garden flowers 11",
+          "url": "https://distractor-8-11.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        }
+      ],
+      "judgments": {
+        "c08a": 3,
+        "c08c": 2,
+        "c08d": 0
+      }
+    },
+    {
+      "id": "academic-paper",
+      "query": "Coastal Ice Study",
+      "tags": [
+        "academic",
+        "publication"
+      ],
+      "source_aliases": [],
+      "acceptable_candidates": [
+        "C. I. Study",
+        "CIS",
+        "\"Coastal Ice Study\""
+      ],
+      "records": [
+        {
+          "id": "c09a",
+          "title": "Coastal Ice Study — source record",
+          "url": "https://primary-9.example/report",
+          "source_type": "DOCUMENT",
+          "source_provider": "brave",
+          "original_text": "Coastal Ice Study reports calibrated measurements and uncertainty.",
+          "original_language": "en",
+          "matched_queries": [
+            "Coastal Ice Study"
+          ],
+          "duplicate_group": "c09a"
+        },
+        {
+          "id": "c09b",
+          "title": "Coastal Ice Study — source record",
+          "url": "https://primary-9.example/report?utm_source=mirror",
+          "source_type": "DOCUMENT",
+          "source_provider": "mojeek",
+          "original_text": "Coastal Ice Study reports calibrated measurements and uncertainty.",
+          "original_language": "en",
+          "matched_queries": [
+            "Coastal Ice Study"
+          ],
+          "duplicate_group": "c09a"
+        },
+        {
+          "id": "c09c",
+          "title": "Independent methods and observations",
+          "url": "https://methods-9.example/data",
+          "source_type": "DOCUMENT",
+          "source_provider": "marginalia",
+          "original_text": "Coastal Ice Study reports calibrated measurements and uncertainty. Supplementary methods and measurement notes.",
+          "original_language": "en",
+          "matched_queries": [
+            "Coastal Ice Study"
+          ]
+        },
+        {
+          "id": "c09d",
+          "title": "Coastal Ice Study",
+          "url": "https://unrelated-9.example/page",
+          "source_type": "WEB",
+          "source_provider": "kagi",
+          "original_text": "Coastal Ice Study merchandise with no research results.",
+          "original_language": "en",
+          "matched_queries": [
+            "Coastal Ice Study"
+          ]
+        },
+        {
+          "id": "c09noise0",
+          "title": "Cooking guide 0",
+          "url": "https://distractor-9-0.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c09noise1",
+          "title": "Travel diary 1",
+          "url": "https://distractor-9-1.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c09noise2",
+          "title": "Computer parts 2",
+          "url": "https://distractor-9-2.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c09noise3",
+          "title": "Garden flowers 3",
+          "url": "https://distractor-9-3.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c09noise4",
+          "title": "Cooking guide 4",
+          "url": "https://distractor-9-4.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c09noise5",
+          "title": "Travel diary 5",
+          "url": "https://distractor-9-5.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c09noise6",
+          "title": "Computer parts 6",
+          "url": "https://distractor-9-6.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c09noise7",
+          "title": "Garden flowers 7",
+          "url": "https://distractor-9-7.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c09noise8",
+          "title": "Cooking guide 8",
+          "url": "https://distractor-9-8.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c09noise9",
+          "title": "Travel diary 9",
+          "url": "https://distractor-9-9.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c09noise10",
+          "title": "Computer parts 10",
+          "url": "https://distractor-9-10.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c09noise11",
+          "title": "Garden flowers 11",
+          "url": "https://distractor-9-11.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        }
+      ],
+      "judgments": {
+        "c09a": 3,
+        "c09c": 2,
+        "c09d": 0
+      }
+    },
+    {
+      "id": "code-project",
+      "query": "tidal-parser",
+      "tags": [
+        "code",
+        "punctuation"
+      ],
+      "source_aliases": [],
+      "acceptable_candidates": [],
+      "records": [
+        {
+          "id": "c10a",
+          "title": "tidal-parser — source record",
+          "url": "https://primary-10.example/report",
+          "source_type": "CODE",
+          "source_provider": "brave",
+          "original_text": "tidal-parser repository contains source code and release history.",
+          "original_language": "en",
+          "matched_queries": [
+            "tidal-parser"
+          ],
+          "duplicate_group": "c10a"
+        },
+        {
+          "id": "c10b",
+          "title": "tidal-parser — source record",
+          "url": "https://primary-10.example/report?utm_source=mirror",
+          "source_type": "CODE",
+          "source_provider": "mojeek",
+          "original_text": "tidal-parser repository contains source code and release history.",
+          "original_language": "en",
+          "matched_queries": [
+            "tidal-parser"
+          ],
+          "duplicate_group": "c10a"
+        },
+        {
+          "id": "c10c",
+          "title": "Independent methods and observations",
+          "url": "https://methods-10.example/data",
+          "source_type": "CODE",
+          "source_provider": "marginalia",
+          "original_text": "tidal-parser repository contains source code and release history. Supplementary methods and measurement notes.",
+          "original_language": "en",
+          "matched_queries": [
+            "tidal-parser"
+          ]
+        },
+        {
+          "id": "c10d",
+          "title": "tidal-parser",
+          "url": "https://unrelated-10.example/page",
+          "source_type": "WEB",
+          "source_provider": "kagi",
+          "original_text": "tidal-parser promotional page with unrelated binaries.",
+          "original_language": "en",
+          "matched_queries": [
+            "tidal-parser"
+          ]
+        },
+        {
+          "id": "c10noise0",
+          "title": "Cooking guide 0",
+          "url": "https://distractor-10-0.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c10noise1",
+          "title": "Travel diary 1",
+          "url": "https://distractor-10-1.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c10noise2",
+          "title": "Computer parts 2",
+          "url": "https://distractor-10-2.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c10noise3",
+          "title": "Garden flowers 3",
+          "url": "https://distractor-10-3.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c10noise4",
+          "title": "Cooking guide 4",
+          "url": "https://distractor-10-4.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c10noise5",
+          "title": "Travel diary 5",
+          "url": "https://distractor-10-5.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c10noise6",
+          "title": "Computer parts 6",
+          "url": "https://distractor-10-6.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c10noise7",
+          "title": "Garden flowers 7",
+          "url": "https://distractor-10-7.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c10noise8",
+          "title": "Cooking guide 8",
+          "url": "https://distractor-10-8.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c10noise9",
+          "title": "Travel diary 9",
+          "url": "https://distractor-10-9.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c10noise10",
+          "title": "Computer parts 10",
+          "url": "https://distractor-10-10.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c10noise11",
+          "title": "Garden flowers 11",
+          "url": "https://distractor-10-11.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        }
+      ],
+      "judgments": {
+        "c10a": 3,
+        "c10c": 2,
+        "c10d": 0
+      }
+    },
+    {
+      "id": "historical-name",
+      "query": "Harbor Survey Office",
+      "tags": [
+        "archive",
+        "historical_name"
+      ],
+      "source_aliases": [
+        "Marine Survey Bureau"
+      ],
+      "acceptable_candidates": [
+        "H. S. Office",
+        "HSO",
+        "\"Harbor Survey Office\""
+      ],
+      "records": [
+        {
+          "id": "c11a",
+          "title": "Harbor Survey Office — source record",
+          "url": "https://primary-11.example/report",
+          "source_type": "ARCHIVE",
+          "source_provider": "brave",
+          "original_text": "Harbor Survey Office is the former label on an archived annual report.",
+          "original_language": "en",
+          "matched_queries": [
+            "Harbor Survey Office"
+          ],
+          "duplicate_group": "c11a"
+        },
+        {
+          "id": "c11b",
+          "title": "Harbor Survey Office — source record",
+          "url": "https://primary-11.example/report?utm_source=mirror",
+          "source_type": "ARCHIVE",
+          "source_provider": "mojeek",
+          "original_text": "Harbor Survey Office is the former label on an archived annual report.",
+          "original_language": "en",
+          "matched_queries": [
+            "Harbor Survey Office"
+          ],
+          "duplicate_group": "c11a"
+        },
+        {
+          "id": "c11c",
+          "title": "Independent methods and observations",
+          "url": "https://methods-11.example/data",
+          "source_type": "ARCHIVE",
+          "source_provider": "marginalia",
+          "original_text": "Harbor Survey Office is the former label on an archived annual report. Supplementary methods and measurement notes.",
+          "original_language": "en",
+          "matched_queries": [
+            "Harbor Survey Office"
+          ]
+        },
+        {
+          "id": "c11d",
+          "title": "Harbor Survey Office",
+          "url": "https://unrelated-11.example/page",
+          "source_type": "WEB",
+          "source_provider": "kagi",
+          "original_text": "Harbor Survey Office is a contemporary fictional game setting.",
+          "original_language": "en",
+          "matched_queries": [
+            "Harbor Survey Office"
+          ]
+        },
+        {
+          "id": "c11noise0",
+          "title": "Cooking guide 0",
+          "url": "https://distractor-11-0.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c11noise1",
+          "title": "Travel diary 1",
+          "url": "https://distractor-11-1.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c11noise2",
+          "title": "Computer parts 2",
+          "url": "https://distractor-11-2.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c11noise3",
+          "title": "Garden flowers 3",
+          "url": "https://distractor-11-3.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c11noise4",
+          "title": "Cooking guide 4",
+          "url": "https://distractor-11-4.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c11noise5",
+          "title": "Travel diary 5",
+          "url": "https://distractor-11-5.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c11noise6",
+          "title": "Computer parts 6",
+          "url": "https://distractor-11-6.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c11noise7",
+          "title": "Garden flowers 7",
+          "url": "https://distractor-11-7.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c11noise8",
+          "title": "Cooking guide 8",
+          "url": "https://distractor-11-8.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c11noise9",
+          "title": "Travel diary 9",
+          "url": "https://distractor-11-9.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c11noise10",
+          "title": "Computer parts 10",
+          "url": "https://distractor-11-10.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c11noise11",
+          "title": "Garden flowers 11",
+          "url": "https://distractor-11-11.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c11alias",
+          "title": "Marine Survey Bureau",
+          "url": "https://registry-11.example/label",
+          "source_type": "DATASET",
+          "source_provider": "wikidata",
+          "original_text": "A source-backed alternate label for this synthetic fixture.",
+          "original_language": "en",
+          "matched_queries": [
+            "Marine Survey Bureau"
+          ]
+        }
+      ],
+      "judgments": {
+        "c11a": 3,
+        "c11c": 2,
+        "c11d": 0,
+        "c11alias": 2
+      }
+    },
+    {
+      "id": "near-copy",
+      "query": "ocean salinity dataset",
+      "tags": [
+        "deduplication",
+        "syndication"
+      ],
+      "source_aliases": [],
+      "acceptable_candidates": [
+        "\"ocean salinity dataset\""
+      ],
+      "records": [
+        {
+          "id": "c12a",
+          "title": "ocean salinity dataset — source record",
+          "url": "https://primary-12.example/report",
+          "source_type": "DATASET",
+          "source_provider": "brave",
+          "original_text": "Public ocean salinity dataset provides field measurements and calibration details.",
+          "original_language": "en",
+          "matched_queries": [
+            "ocean salinity dataset"
+          ],
+          "duplicate_group": "c12a"
+        },
+        {
+          "id": "c12b",
+          "title": "ocean salinity dataset — source record",
+          "url": "https://primary-12.example/report?utm_source=mirror",
+          "source_type": "DATASET",
+          "source_provider": "mojeek",
+          "original_text": "Public ocean salinity dataset provides field measurements and calibration details.",
+          "original_language": "en",
+          "matched_queries": [
+            "ocean salinity dataset"
+          ],
+          "duplicate_group": "c12a"
+        },
+        {
+          "id": "c12c",
+          "title": "Independent methods and observations",
+          "url": "https://methods-12.example/data",
+          "source_type": "DATASET",
+          "source_provider": "marginalia",
+          "original_text": "Public ocean salinity dataset provides field measurements and calibration details. Supplementary methods and measurement notes.",
+          "original_language": "en",
+          "matched_queries": [
+            "ocean salinity dataset"
+          ]
+        },
+        {
+          "id": "c12d",
+          "title": "ocean salinity dataset",
+          "url": "https://unrelated-12.example/page",
+          "source_type": "WEB",
+          "source_provider": "kagi",
+          "original_text": "An ocean salinity dataset discussion contains no observations.",
+          "original_language": "en",
+          "matched_queries": [
+            "ocean salinity dataset"
+          ]
+        },
+        {
+          "id": "c12noise0",
+          "title": "Cooking guide 0",
+          "url": "https://distractor-12-0.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c12noise1",
+          "title": "Travel diary 1",
+          "url": "https://distractor-12-1.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c12noise2",
+          "title": "Computer parts 2",
+          "url": "https://distractor-12-2.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c12noise3",
+          "title": "Garden flowers 3",
+          "url": "https://distractor-12-3.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c12noise4",
+          "title": "Cooking guide 4",
+          "url": "https://distractor-12-4.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c12noise5",
+          "title": "Travel diary 5",
+          "url": "https://distractor-12-5.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c12noise6",
+          "title": "Computer parts 6",
+          "url": "https://distractor-12-6.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c12noise7",
+          "title": "Garden flowers 7",
+          "url": "https://distractor-12-7.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c12noise8",
+          "title": "Cooking guide 8",
+          "url": "https://distractor-12-8.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c12noise9",
+          "title": "Travel diary 9",
+          "url": "https://distractor-12-9.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c12noise10",
+          "title": "Computer parts 10",
+          "url": "https://distractor-12-10.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c12noise11",
+          "title": "Garden flowers 11",
+          "url": "https://distractor-12-11.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        }
+      ],
+      "judgments": {
+        "c12a": 3,
+        "c12c": 2,
+        "c12d": 0
+      }
+    },
+    {
+      "id": "missing-date",
+      "query": "tide gauge calibration",
+      "tags": [
+        "undated",
+        "metadata"
+      ],
+      "source_aliases": [],
+      "acceptable_candidates": [
+        "\"tide gauge calibration\""
+      ],
+      "records": [
+        {
+          "id": "c13a",
+          "title": "tide gauge calibration — source record",
+          "url": "https://primary-13.example/report",
+          "source_type": "DOCUMENT",
+          "source_provider": "brave",
+          "original_text": "Tide gauge calibration procedures with stated instrument specifications.",
+          "original_language": "en",
+          "matched_queries": [
+            "tide gauge calibration"
+          ],
+          "duplicate_group": "c13a"
+        },
+        {
+          "id": "c13b",
+          "title": "tide gauge calibration — source record",
+          "url": "https://primary-13.example/report?utm_source=mirror",
+          "source_type": "DOCUMENT",
+          "source_provider": "mojeek",
+          "original_text": "Tide gauge calibration procedures with stated instrument specifications.",
+          "original_language": "en",
+          "matched_queries": [
+            "tide gauge calibration"
+          ],
+          "duplicate_group": "c13a"
+        },
+        {
+          "id": "c13c",
+          "title": "Independent methods and observations",
+          "url": "https://methods-13.example/data",
+          "source_type": "DOCUMENT",
+          "source_provider": "marginalia",
+          "original_text": "Tide gauge calibration procedures with stated instrument specifications. Supplementary methods and measurement notes.",
+          "original_language": "en",
+          "matched_queries": [
+            "tide gauge calibration"
+          ]
+        },
+        {
+          "id": "c13d",
+          "title": "tide gauge calibration",
+          "url": "https://unrelated-13.example/page",
+          "source_type": "WEB",
+          "source_provider": "kagi",
+          "original_text": "Tide gauge calibration services with no methods.",
+          "original_language": "en",
+          "matched_queries": [
+            "tide gauge calibration"
+          ]
+        },
+        {
+          "id": "c13noise0",
+          "title": "Cooking guide 0",
+          "url": "https://distractor-13-0.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c13noise1",
+          "title": "Travel diary 1",
+          "url": "https://distractor-13-1.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c13noise2",
+          "title": "Computer parts 2",
+          "url": "https://distractor-13-2.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c13noise3",
+          "title": "Garden flowers 3",
+          "url": "https://distractor-13-3.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c13noise4",
+          "title": "Cooking guide 4",
+          "url": "https://distractor-13-4.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c13noise5",
+          "title": "Travel diary 5",
+          "url": "https://distractor-13-5.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c13noise6",
+          "title": "Computer parts 6",
+          "url": "https://distractor-13-6.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c13noise7",
+          "title": "Garden flowers 7",
+          "url": "https://distractor-13-7.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c13noise8",
+          "title": "Cooking guide 8",
+          "url": "https://distractor-13-8.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c13noise9",
+          "title": "Travel diary 9",
+          "url": "https://distractor-13-9.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c13noise10",
+          "title": "Computer parts 10",
+          "url": "https://distractor-13-10.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c13noise11",
+          "title": "Garden flowers 11",
+          "url": "https://distractor-13-11.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        }
+      ],
+      "judgments": {
+        "c13a": 3,
+        "c13c": 2,
+        "c13d": 0
+      }
+    },
+    {
+      "id": "handle",
+      "query": "@marine_lab",
+      "tags": [
+        "handle",
+        "identifier"
+      ],
+      "source_aliases": [],
+      "acceptable_candidates": [
+        "marine_lab"
+      ],
+      "records": [
+        {
+          "id": "c14a",
+          "title": "@marine_lab — source record",
+          "url": "https://primary-14.example/report",
+          "source_type": "WEB",
+          "source_provider": "brave",
+          "original_text": "The public account marine_lab links to its observation methods.",
+          "original_language": "und",
+          "matched_queries": [
+            "@marine_lab"
+          ],
+          "duplicate_group": "c14a"
+        },
+        {
+          "id": "c14b",
+          "title": "@marine_lab — source record",
+          "url": "https://primary-14.example/report?utm_source=mirror",
+          "source_type": "WEB",
+          "source_provider": "mojeek",
+          "original_text": "The public account marine_lab links to its observation methods.",
+          "original_language": "und",
+          "matched_queries": [
+            "@marine_lab"
+          ],
+          "duplicate_group": "c14a"
+        },
+        {
+          "id": "c14c",
+          "title": "Independent methods and observations",
+          "url": "https://methods-14.example/data",
+          "source_type": "WEB",
+          "source_provider": "marginalia",
+          "original_text": "The public account marine_lab links to its observation methods. Supplementary methods and measurement notes.",
+          "original_language": "und",
+          "matched_queries": [
+            "@marine_lab"
+          ]
+        },
+        {
+          "id": "c14d",
+          "title": "@marine_lab",
+          "url": "https://unrelated-14.example/page",
+          "source_type": "WEB",
+          "source_provider": "kagi",
+          "original_text": "An unrelated account with a similar display name.",
+          "original_language": "und",
+          "matched_queries": [
+            "@marine_lab"
+          ]
+        },
+        {
+          "id": "c14noise0",
+          "title": "Cooking guide 0",
+          "url": "https://distractor-14-0.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c14noise1",
+          "title": "Travel diary 1",
+          "url": "https://distractor-14-1.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c14noise2",
+          "title": "Computer parts 2",
+          "url": "https://distractor-14-2.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c14noise3",
+          "title": "Garden flowers 3",
+          "url": "https://distractor-14-3.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c14noise4",
+          "title": "Cooking guide 4",
+          "url": "https://distractor-14-4.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c14noise5",
+          "title": "Travel diary 5",
+          "url": "https://distractor-14-5.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c14noise6",
+          "title": "Computer parts 6",
+          "url": "https://distractor-14-6.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c14noise7",
+          "title": "Garden flowers 7",
+          "url": "https://distractor-14-7.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c14noise8",
+          "title": "Cooking guide 8",
+          "url": "https://distractor-14-8.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c14noise9",
+          "title": "Travel diary 9",
+          "url": "https://distractor-14-9.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c14noise10",
+          "title": "Computer parts 10",
+          "url": "https://distractor-14-10.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c14noise11",
+          "title": "Garden flowers 11",
+          "url": "https://distractor-14-11.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        }
+      ],
+      "judgments": {
+        "c14a": 3,
+        "c14c": 2,
+        "c14d": 0
+      }
+    },
+    {
+      "id": "domain",
+      "query": "research.example",
+      "tags": [
+        "domain",
+        "archive"
+      ],
+      "source_aliases": [],
+      "acceptable_candidates": [
+        "research example"
+      ],
+      "records": [
+        {
+          "id": "c15a",
+          "title": "research.example — source record",
+          "url": "https://primary-15.example/report",
+          "source_type": "WEB",
+          "source_provider": "brave",
+          "original_text": "Research archive hosted at research.example.",
+          "original_language": "en",
+          "matched_queries": [
+            "research.example"
+          ],
+          "duplicate_group": "c15a"
+        },
+        {
+          "id": "c15b",
+          "title": "research.example — source record",
+          "url": "https://primary-15.example/report?utm_source=mirror",
+          "source_type": "WEB",
+          "source_provider": "mojeek",
+          "original_text": "Research archive hosted at research.example.",
+          "original_language": "en",
+          "matched_queries": [
+            "research.example"
+          ],
+          "duplicate_group": "c15a"
+        },
+        {
+          "id": "c15c",
+          "title": "Independent methods and observations",
+          "url": "https://methods-15.example/data",
+          "source_type": "WEB",
+          "source_provider": "marginalia",
+          "original_text": "Research archive hosted at research.example. Supplementary methods and measurement notes.",
+          "original_language": "en",
+          "matched_queries": [
+            "research.example"
+          ]
+        },
+        {
+          "id": "c15d",
+          "title": "research.example",
+          "url": "https://unrelated-15.example/page",
+          "source_type": "WEB",
+          "source_provider": "kagi",
+          "original_text": "An unrelated article mentions research.example without evidence.",
+          "original_language": "en",
+          "matched_queries": [
+            "research.example"
+          ]
+        },
+        {
+          "id": "c15noise0",
+          "title": "Cooking guide 0",
+          "url": "https://distractor-15-0.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c15noise1",
+          "title": "Travel diary 1",
+          "url": "https://distractor-15-1.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c15noise2",
+          "title": "Computer parts 2",
+          "url": "https://distractor-15-2.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c15noise3",
+          "title": "Garden flowers 3",
+          "url": "https://distractor-15-3.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c15noise4",
+          "title": "Cooking guide 4",
+          "url": "https://distractor-15-4.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c15noise5",
+          "title": "Travel diary 5",
+          "url": "https://distractor-15-5.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c15noise6",
+          "title": "Computer parts 6",
+          "url": "https://distractor-15-6.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c15noise7",
+          "title": "Garden flowers 7",
+          "url": "https://distractor-15-7.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c15noise8",
+          "title": "Cooking guide 8",
+          "url": "https://distractor-15-8.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c15noise9",
+          "title": "Travel diary 9",
+          "url": "https://distractor-15-9.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c15noise10",
+          "title": "Computer parts 10",
+          "url": "https://distractor-15-10.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        },
+        {
+          "id": "c15noise11",
+          "title": "Garden flowers 11",
+          "url": "https://distractor-15-11.example/",
+          "source_type": "WEB",
+          "source_provider": "searxng",
+          "original_text": "Synthetic unrelated material for retrieval evaluation.",
+          "original_language": "en"
+        }
+      ],
+      "judgments": {
+        "c15a": 3,
+        "c15c": 2,
+        "c15d": 0
+      }
+    }
+  ]
+}

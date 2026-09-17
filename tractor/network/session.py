@@ -6,16 +6,11 @@ from pathlib import Path
 from tractor.network.client import NetworkClient
 from tractor.network.tor import TorNetwork, TorRuntime
 from tractor.settings import Settings
-from tractor.sources.onion import OnionSearxNG, TorchSearch
-from tractor.sources.web import SearxNG
+from tractor.sources.catalog import catalog
 
 
 def configured_adapters(settings: Settings, base: list, selected: list[str]) -> list:
-    adapters = [*base, TorchSearch()]
-    if settings.web_endpoint:
-        adapters.append(SearxNG(settings.web_endpoint))
-    if settings.onion_endpoint:
-        adapters.append(OnionSearxNG(settings.onion_endpoint))
+    adapters = catalog(settings, base)
     missing = set(selected) - {a.id for a in adapters}
     if missing:
         raise ValueError(
