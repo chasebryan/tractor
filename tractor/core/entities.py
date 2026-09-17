@@ -26,7 +26,7 @@ def make_entity(kind: str, value: str, result_id: str) -> Entity:
 
 def extract_entities(result: SourceResult) -> list[Entity]:
     identifiers = [("domain", urlsplit(result.url).hostname or "")]
-    for kind in ("doi", "wikidata", "repository"):
+    for kind in ("doi", "wikidata", "repository", "pmid"):
         if result.metadata.get(kind):
             identifiers.append((kind, str(result.metadata[kind])))
     # These observations are exact identifiers, never inferred person identities.

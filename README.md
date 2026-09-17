@@ -1,14 +1,38 @@
 # TRACTOR
 
-**Global Intelligence Search**
+**Global Intelligence Search · v0.2**
 
-A native, local-first desktop application for evidence-led research across independent public data sources. Enter one subject. TRACTOR constructs a traceable query plan, retrieves records asynchronously, investigates discovered multilingual label candidates, groups duplicates, ranks results, and saves the investigation locally.
+A native desktop application for evidence-led research across independent public sources. Enter one subject. The engine builds a query plan, retrieves successive result pages, follows traceable multilingual candidates, groups duplicate records, and saves the evidence and unfinished work on your device.
 
-This repository implements the initial end-to-end MVP. It reports exactly which providers and queries were attempted. A finished investigation does not imply exhaustive coverage.
+The launch screen has one wordmark and one search field. Results, source coverage, and evidence appear as the investigation runs. A completed run describes the recorded search scope; it does not imply exhaustive coverage of the internet.
 
-## Run
+## Download and run
 
-Use **Python 3.11–3.13** (3.12 recommended). Qt 6.8 is pinned for compatibility with older desktop CPUs. No API keys are required for the included providers.
+[Download the application source](https://github.com/chasebryan/tractor/archive/refs/heads/tractor-mvp.zip), extract it, and install **Python 3.11–3.13** (3.12 recommended). The built-in providers require no API keys.
+
+**Linux and macOS:** open a terminal in the extracted folder and run:
+
+```bash
+sh run.sh
+```
+
+**Windows:** double-click `run.cmd`. Install Python with its `py` launcher enabled.
+
+The launcher creates a private `.venv` and installs dependencies on the first run. Later launches reuse it; dependency changes trigger installation again. First-time setup requires internet access. The desktop application makes no network requests until you start a search.
+
+On Fedora, install a supported interpreter with `sudo dnf install python3.12`. The launcher also accepts Python 3.11 and 3.13; Python 3.14 is not supported by the Qt version used here. Qt 6.8 is pinned for older desktop CPU compatibility. Linux requires desktop graphics libraries; minimal systems may need EGL, OpenGL, and Qt xcb dependencies. Wayland is also supported. Linux has been exercised directly; Windows and macOS launchers need platform verification. Signed native installers are not included.
+
+To clone or update the development branch:
+
+```bash
+git clone --branch tractor-mvp https://github.com/chasebryan/tractor.git
+cd tractor
+sh run.sh
+```
+
+For an existing checkout on that branch, run `git pull --ff-only`, then `sh run.sh` again.
+
+Manual installation is also supported:
 
 ```bash
 python3.12 -m venv .venv
@@ -17,95 +41,101 @@ python -m pip install -e .
 tractor
 ```
 
-On Windows, activate with `.venv\Scripts\Activate.ps1`. On Linux, Qt needs your distribution's desktop graphics libraries; minimal systems may need `libegl1`, `libopengl0`, and the Qt xcb dependencies. The app can also use Wayland. Windows and macOS are intended targets, but this first implementation has been exercised on Linux.
+On Windows, activate with `.venv\Scripts\Activate.ps1`.
 
-For an explicitly selected data location:
+## Use it
 
-```bash
-tractor --data-dir ./local-investigations
-```
+1. Enter a name, organization, or topic and press Enter. Every search uses the same iterative engine; there is no shallow-search mode.
+2. Read results as sources respond. Cards show source category, provider, available date, language, relevance, and a link. Filtering and sorting work during retrieval. New arrivals retain existing cards and preserve the record you are reading.
+3. Open **Evidence** to inspect the original text, discovery chain, ranking calculation, content hash, and provider metadata. **Related** shows observed identifiers and retained duplicates. **Copy link** copies the source address; **Open source** opens your external browser.
+4. Open **Coverage** to inspect attempts, provider errors, request/cache counts, languages, discovery passes, limits, and the queue of remaining searches.
+5. **Stop** cancels outstanding requests and saves collected evidence. **Continue** resumes the saved queue, including after closing and reopening the app. **Refresh** starts a separate investigation using fresh requests and preserves its predecessor in History.
+6. Search **History** by subject or collected source text. Reopen an investigation to review or continue it. **Export** writes full JSON, Markdown, or spreadsheet-safe CSV.
 
-The same engine runs without Qt windows:
+Results can be filtered by text, category, provider, language, domain, publication date, source region, observed entity type, and relevance, or sorted by relevance/newest/oldest. Unknown dates sort last. Partial publication dates remain partial; date filters use their possible range. Provider-reported source country is not treated as the subject's location.
+
+Shortcuts: **Ctrl+L** focuses the search, **Esc** stops retrieval, **Ctrl+E** exports, and **Ctrl+H** opens history when the engine is idle.
+
+## Sources
+
+| Provider | Coverage | Reference |
+| --- | --- | --- |
+| Wikidata | Knowledge records and multilingual labels; not an official company registry | [Wikibase API](https://www.mediawiki.org/wiki/Wikibase/API) |
+| Crossref | Publication metadata, available abstracts, DOI identifiers | [Crossref REST API](https://www.crossref.org/documentation/retrieve-metadata/rest-api/) |
+| Internet Archive | Archived item catalog metadata; not a Wayback-wide crawl | [Internet Archive developer portal](https://archive.org/developers/) |
+| GitHub | Public repository names and descriptions; not authenticated code search | [Repository search](https://docs.github.com/en/rest/search/search#search-repositories) |
+| Europe PMC | Life-sciences publication metadata, abstracts, DOI and PubMed identifiers | [Europe PMC services](https://europepmc.org/RestfulWebService) |
+| GDELT News | Recent global news article metadata, over a three-month window | [GDELT DOC API](https://blog.gdeltproject.org/gdelt-doc-2-0-api-debuts/) |
+| SearxNG, optional | General web result snippets from your configured server | [SearxNG search API](https://docs.searxng.org/dev/search_api.html) |
+
+Select providers in **Settings**. Desktop and command-line searches use the same saved selections. An unavailable or rate-limited source is reported as failed, while other providers keep running. Failure is never represented as zero matches. The latest live verification reached five of the six built-in services; GDELT timed out and was recorded as unavailable.
+
+To enable general web search, enter a SearxNG server URL in Settings and select its checkbox. Use a server you operate or trust, with JSON output enabled. Many public instances disable JSON access. HTTPS is required except for a local loopback server such as `http://127.0.0.1:8080`. Queries also reach the upstream engines selected by that server. No public instance is selected automatically. Changing the configured server requires a fresh investigation for that source; saved cursors are not silently sent to a different server.
+
+The built-in services do not form a general web index. News metadata is not full article text; GDELT's seen time is retained as an observation time, not invented as a publication date. Third-party coverage, availability, and indexing vary.
+
+## Engine and evidence
+
+**A persistent work queue.** Each unit records provider, query, discovery pass, page, and cursor. Successful pages are checkpointed into SQLite. Interrupted pages remain queued. Continuation retries unfinished work without repeating successful pages. A provider has at most one active search; other providers can run concurrently. Repeated pages and cursors stop with an explicit coverage note.
+
+Each run permits up to 72 adapter searches, 3 pages per provider/query, 240 seconds, and 6 concurrent jobs. Investigations are bounded to 3 discovery passes, 12 query variants, and 3,000 retained records; each retrieval accepts up to 15 records. These are resource ceilings, not completeness claims. **Continue** renews the per-run page, query, and time budgets. The record cap remains investigation-wide. Provider-specific caps and unavailable pagination are disclosed. GitHub exposes at most 1,000 search hits; Crossref's offset retrieval is bounded at 10,000. GDELT does not paginate in this implementation.
+
+Requests are rate-limited per host (GitHub: at least 6.2 seconds apart), with bounded retries, backoff, response sizes, caching, and connection/read timeouts. Multiple application instances have separate rate limiters. Refresh bypasses the saved HTTP cache.
+
+**Traceable candidates.** The seed is user-supplied. Legal-suffix spelling changes and mechanical transliterations are hypotheses. An exact textual match to a Wikidata label can produce foreign-language candidates, each linked to a source and marked **discovered**, not confirmed. Matching names do not establish that a record describes the intended subject. Multiple URLs alone never promote an alias to corroborated. Discovery depth and variant limits appear in coverage notes.
+
+Language detection leaves short names undetermined. Provider-declared languages are retained, with common Europe PMC language codes normalized. Multilingual Wikidata labels are requested in ten configured languages, independently of browser or OS locale. Original text is never overwritten. A tested `TranslationBackend` protocol is available for integrations; **no machine-translation service is enabled**.
+
+**Duplicate grouping.** An index matches canonical URLs, stable identifiers such as DOI and PubMed IDs, exact substantial content hashes, and bounded near-text comparisons. Conflicting stable identifiers prevent text-only merging. Short or empty metadata does not collapse unrelated records. Duplicate copies and their discovery paths remain stored and exported. Near-text matches are marked as inferences. Semantic matching of translated copies is not implemented.
+
+**Transparent ranking.** Relevance combines title token overlap (up to 35), body overlap (20), a whole-token title phrase (20), corpus-aware BM25 term rarity (15), provenance (5), and stable identifiers (5). A traceable candidate query can rank a foreign-language record; candidate lexical contributions receive a 15% discount. Evidence shows the actual query and components used. The score is not an identity assertion or truth probability. Evidence completeness separately measures the available URL, discovery chain, original text, and date.
+
+**Conservative relationships.** Shared domains, DOI, PubMed and Wikidata IDs, repository names, and exact email identifiers create observation edges. Shared hosting does not establish shared ownership, and shared names do not establish person identity. The evidence graph remains inspectable without imposing a graph dashboard.
+
+## Command line
+
+The same engine runs without opening Qt windows:
 
 ```bash
 tractor --search "OpenStreetMap" --export-json investigation.json
+tractor --history
+tractor --history "cartography"
+tractor --resume INVESTIGATION_ID --export-json continued.json
+tractor --search "OpenStreetMap" --sources wikidata crossref europe_pmc
 ```
 
-The CLI uses all built-in providers. Desktop provider choices are saved in Settings.
+From a launcher installation, replace `tractor` with `.venv/bin/tractor` on Linux/macOS or `.venv\Scripts\tractor.exe` on Windows. Alternatively, pass the same options to `sh run.sh` or `run.cmd`. Use `--data-dir ./local-investigations` to select a different local store. `--sources` overrides the saved choices for that command. Ctrl+C checkpoints collected results and remaining work.
 
-## Search experience
+## Storage, exports, and privacy
 
-- A restrained home screen with one large search field, History, and Settings.
-- Results stream while background work continues. Stop cancels outstanding work and retains collected evidence.
-- Each card includes source category, provider, date, language, relevance, source link, evidence, and related records.
-- Evidence shows the original text, query chain, ranking components, content hash, and provider metadata. All previews are plain text. “Open source” explicitly opens your external browser.
-- Coverage lists source attempts, errors, queries, request/cache counts, languages, pass yields, limits, candidate aliases, and the evidence graph.
-- Post-collection filters cover text, category, provider, language, domain, date, observed region, entity type, and relevance. Unknown dates and geography remain unknown.
-- History reopens saved results and evidence. Interrupted investigations are labeled as such.
-- Export complete JSON, a cited Markdown report, or spreadsheet-safe CSV. JSON retains duplicate records, original provider payloads, query states, entities, edges, attempts, budgets, and timestamps.
+SQLite stores atomic investigation snapshots, individual record projections, cached responses, and a local full-text history index. Existing v0.1 history migrates automatically. Older investigations without saved cursors can be reopened and refreshed. A stopped application leaves unfinished investigations visibly marked as interrupted.
 
-## Included public sources
+JSON preserves results, duplicates, source payloads, query states, entities, edges, attempts, budgets, source configuration, and remaining tasks. Markdown includes sources, coverage, trails, attempts, and limits. CSV includes every retained result with a duplicate reference and neutralizes spreadsheet formulas. Exports are atomically replaced only after a complete write.
 
-| Adapter | Coverage | API reference |
-| --- | --- | --- |
-| Wikidata | Knowledge records and multilingual label candidates; not an official company registry | [Wikibase API](https://www.mediawiki.org/wiki/Wikibase/API) |
-| Crossref | Publication metadata, available abstracts, and DOI identifiers | [Crossref REST API](https://www.crossref.org/documentation/retrieve-metadata/rest-api/) |
-| Internet Archive | Archived item catalog metadata; not a Wayback-wide crawl | [Internet Archive developer portal](https://archive.org/developers/) |
-| GitHub | Public repository names and descriptions; not authenticated code search | [GitHub search API](https://docs.github.com/en/rest/search/search#search-repositories) |
+No telemetry, advertising, history upload, stored API credentials, or background searching. Search terms and discovered variants go to enabled providers; those services can observe your IP and apply their own policies. Investigations, cache, and exports are stored unencrypted. Default data location comes from `platformdirs` (`~/.local/share/TRACTOR` on typical Linux systems); Settings shows the exact location. Remove that directory while the app is closed to delete history, cache, and settings. Structured logs use query IDs rather than full queries or raw provider error bodies.
 
-An API may be unavailable, rate-limited, or have limited coverage. TRACTOR records that outcome. These four providers do not constitute a general index of the web. Requests use explicit language settings independent of browser history, browser locale, or OS locale.
+Read [SECURITY.md](SECURITY.md) for retrieval boundaries and reporting.
 
-The default investigation budget is 3 passes, 12 unique query variants, 48 adapter queries, 15 records per adapter query, 4 concurrent jobs, and 180 seconds. These are resource ceilings, not search-depth modes. Provider responses may be truncated; coverage records that fact. Requests are rate-limited per host (GitHub: at least 6.2 seconds apart), with bounded retries, backoff, response size, and timeouts. Multiple running app instances have separate rate limiters.
-
-## Evidence and language behavior
-
-The seed is user-supplied. Legal-suffix spelling changes and mechanical transliterations are hypotheses. An exact textual match to a Wikidata label or alias can produce foreign-language search candidates, each linked to its source record and explicitly marked **discovered**, not confirmed. A matching label does not establish that a record describes the intended subject. Multiple URLs alone never promote a candidate to corroborated.
-
-Language detection is conservative and leaves short names as `und` (undetermined). Provider-declared languages are retained. Multilingual labels and aliases are sourced from Wikidata in ten configured languages; availability depends on the matched records. Source text is never overwritten. A replaceable `TranslationBackend` protocol and translation-preservation helper are implemented and tested; **no machine-translation service is enabled by default**.
-
-Correlation uses observed domains, DOI identifiers, repository names, Wikidata IDs, and exact email identifiers. It creates observation edges, not person-identity assertions. A shared hosting domain is not evidence of shared ownership. The UI exposes evidence relationships without imposing a graph dashboard.
-
-Deduplication recognizes normalized URLs, exact substantial text hashes, and high text similarity. Duplicate records and their discovery paths remain stored. Short or empty metadata does not collapse unrelated records. Path case, trailing slash semantics, and repeated query-parameter order are preserved. Semantic translated-copy matching is not implemented.
-
-Ranking is a transparent weighted sum: title token overlap (40), body overlap (25), exact title phrase (20), stable identifier (5), traceable provenance (5), and original record (5). Evidence completeness measures available source URL, discovery chain, original text, and date; it is **not a truth probability**. Provider reputation or independence is not assumed.
-
-## Architecture
+## Architecture and development
 
 ```text
 tractor/
   app.py                 Desktop and headless entry points
+  settings.py            Shared provider configuration
   ui/                    Qt widgets and cancellable background worker
-  core/                  Models, query plans, engine, provenance, scoring, convergence
-  sources/               Common adapter contract and four complete API adapters
+  core/                  Queue, models, provenance, deduplication, ranking, filters
+  sources/               Six public API adapters and optional SearxNG integration
   language/              Detection, transliteration, translation protocol
-  analysis/              Conservative identifier relationships
+  analysis/              Observed identifier relationships
   network/               Pooling, retries, route isolation, throttling, robots helper
-  storage/               SQLite migrations, atomic checkpoints, expiring response cache
+  storage/               SQLite migrations, full-text history, cache, atomic file writes
   export/                JSON, CSV, and Markdown reports
-tests/                   Mocked providers, engine, storage, network, and native UI checks
+scripts/launch.py         First-run environment setup
 ```
 
-The GUI owns no networking logic. A QThread runs an asyncio engine and sends detached snapshots via Qt signals. Each owning thread has its own SQLite connection. The database uses WAL, parameterized queries, migrations, atomic checkpoints, complete JSON snapshots, and queryable record projections. Source payloads and translations are retained inside result records. Closing during retrieval cancels requests before the worker is destroyed.
+The GUI owns no networking logic. A QThread runs an asyncio engine and sends detached snapshots via Qt signals. Each thread has its own SQLite connection. Closing during retrieval cancels requests before the worker is destroyed.
 
-### Adding a source
-
-Implement `SourceAdapter.search(QueryVariant, SearchContext) -> SearchBatch`, provide a stable adapter ID/name/description, and register it in `sources.default_adapters()`. Official API hosts must also be registered in the explicit network allowlist. Return `SourceResult` objects and optional `QueryVariant` candidates with `parent_result`, reason, and evidence URLs. The engine requires no provider-specific branch. Supply mocked responses and contract tests.
-
-Future page crawlers must obtain and enforce robots rules through an approved network context before fetching pages. A failed robots request is not permission. Current adapters use official metadata APIs and do not crawl arbitrary result URLs.
-
-### Tor boundary
-
-`network/tor.py` supplies a distinct Tor client using an explicit SOCKS proxy with remote DNS. Clearnet clients reject onion hosts; Tor clients reject clearnet hosts. Redirect destinations are validated before following. No Tor daemon is started, no onion index is configured, and no live onion adapter ships in this MVP. The seam is tested; live Tor behavior is not yet validated.
-
-## Privacy and security
-
-No telemetry, advertising, search-history upload, credential storage, or background network requests on startup. Search terms and discovered variants go to enabled providers when you search; those services can observe your IP and apply their own retention policies. Local investigations, cache, and exports are sensitive research data and are not encrypted by this application. Use OS account protections and disk encryption where needed.
-
-Data defaults to the platform user-data location from `platformdirs` (`~/.local/share/TRACTOR` on typical Linux systems). Settings shows the exact location. Remove that directory while the app is closed to remove history, cache, and settings. Structured logs go to stderr and use query IDs rather than full queries; no credentials or raw provider error bodies are logged. `--debug` enables the application debug level without enabling HTTP wire logging.
-
-Read [SECURITY.md](SECURITY.md) for retrieval boundaries and vulnerability reporting.
-
-## Development and verification
+To add a source, implement `search(QueryVariant, SearchContext) -> SearchBatch` and register the adapter. Return normalized `SourceResult` objects, optional evidence-backed query candidates, and a `next_cursor` for pagination. Official API hosts must be registered in the network policy. The scheduler requires no provider-specific branches. Add mocked contract and pagination tests.
 
 ```bash
 python -m pip install -e '.[dev]'
@@ -115,10 +145,8 @@ QT_QPA_PLATFORM=offscreen pytest -q
 python -m build
 ```
 
-Tests block live HTTP connections and use mocked responses. GUI tests exercise real Qt widgets, queued worker signals, streaming, filtering, and reopened evidence. The GitHub Actions workflow targets Python 3.11, 3.12, and 3.13 on Linux. Live API checks are separate from deterministic tests.
+Deterministic tests block live HTTP and exercise provider contracts, pagination, continuation, cancellation, provenance, ranking, deduplication, network boundaries, migrations, exports, and real Qt widgets. CI targets Python 3.11, 3.12, and 3.13 on Linux. Live-service checks are separate.
 
-## Next steps
+A distinct Tor client supports explicit SOCKS routing with remote DNS and rejects clearnet destinations. No daemon is started and no live onion adapter is included; live Tor behavior remains unverified. Full-document/PDF extraction, scheduled refresh, translation service integration, additional government/forum sources, and signed installers are future work. Current adapters use metadata/search APIs and do not crawl arbitrary result pages. Future crawlers must enforce robots policies and bound document parsing resources.
 
-This release is the requested vertical slice, not the entire long-term source catalog. Future work includes additional web/news/government/forum providers, source-specific pagination, richer entity extraction, evidence-backed geographic pivots, a configured translation service, public onion adapters, isolated full-document extraction (including PDF), semantic translated-copy detection, refresh scheduling, and signed native installers. No unsupported source family is represented as searched.
-
-License: the repository's existing [AGPL-3.0 license](LICENSE).
+License: [AGPL-3.0](LICENSE).

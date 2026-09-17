@@ -12,6 +12,7 @@ class InternetArchive:
     description = "Archive item catalog metadata; not an exhaustive Wayback crawl."
 
     async def search(self, query: QueryVariant, context: SearchContext) -> SearchBatch:
+        page = int(context.cursor or "1")
         term = re.sub(r'["\\]', " ", query.value)
         data = await context.client.get_json(
             "https://archive.org/advancedsearch.php",
@@ -19,7 +20,7 @@ class InternetArchive:
                 "q": f'"{term}"',
                 "output": "json",
                 "rows": context.limit,
-                "page": 1,
+                "page": page,
                 "fl[]": ["identifier", "title", "description", "creator", "date", "language"],
             },
             interval=1.5,
@@ -43,4 +44,11 @@ class InternetArchive:
             )
             for item in docs
         ]
-        return SearchBatch(results, truncated=data["response"].get("numFound", 0) > len(results))
+        total = data["response"].get("numFound", 0)
+        more = total > page * context.limit
+        return SearchBatch(
+            results,
+            truncated=more,
+            next_cursor=str(page + 1) if more and results else None,
+            total_available=total,
+        )

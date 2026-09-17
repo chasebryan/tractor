@@ -11,9 +11,10 @@ class Crossref:
     description = "Publication metadata and DOI records; full text is not automatically fetched."
 
     async def search(self, query: QueryVariant, context: SearchContext) -> SearchBatch:
+        offset = int(context.cursor or "0")
         data = await context.client.get_json(
             "https://api.crossref.org/works",
-            {"query.bibliographic": query.value, "rows": context.limit},
+            {"query.bibliographic": query.value, "rows": context.limit, "offset": offset},
             interval=1.0,
             stats=context.stats,
         )
@@ -45,6 +46,13 @@ class Crossref:
                     },
                 )
             )
+        total = data["message"].get("total-results", 0)
+        more = total > offset + len(results)
         return SearchBatch(
-            results, truncated=data["message"].get("total-results", 0) > len(results)
+            results,
+            truncated=more,
+            next_cursor=str(offset + len(results))
+            if more and results and offset + len(results) <= 10000
+            else None,
+            total_available=total,
         )

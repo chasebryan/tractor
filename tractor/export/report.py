@@ -4,6 +4,7 @@ from pathlib import Path
 from urllib.parse import quote
 
 from tractor.core.models import Investigation
+from tractor.storage.atomic import atomic_text
 
 
 def escaped(value: object) -> str:
@@ -72,10 +73,20 @@ def export_markdown(inv: Investigation, path: Path) -> None:
     ]
     lines += ["", "## Source attempts", ""]
     lines += [
-        f"- Pass {a.pass_number} · {a.provider} · {escaped(a.query)}: {a.status}; "
+        f"- Run {a.run_number} · Pass {a.pass_number} · Page {a.page} · "
+        f"{a.provider} · {escaped(a.query)}: {a.status}; "
         f"{a.result_count} records"
         + (f"; {escaped(a.error)}" if a.error else "")
         + ("; provider response limited" if a.truncated else "")
         for a in inv.attempts
     ]
-    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    lines += ["", "## Limits and remaining work", ""]
+    lines += [f"- {escaped(note)}" for note in inv.limits]
+    variants = {v.id: v.value for v in inv.plan.variants}
+    lines += [
+        f"- Pending: {task.provider} · {escaped(variants.get(task.query_id, task.query_id))} "
+        f"· page {task.page}"
+        for task in inv.pending_tasks
+    ]
+    with atomic_text(path) as file:
+        file.write("\n".join(lines) + "\n")

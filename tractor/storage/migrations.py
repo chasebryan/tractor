@@ -17,6 +17,15 @@ MIGRATIONS = [
         content_hash TEXT NOT NULL, headers TEXT NOT NULL, body BLOB NOT NULL
     );
     """,
+    """
+    CREATE VIRTUAL TABLE investigation_search USING fts5(investigation_id UNINDEXED, content);
+    INSERT INTO investigation_search(investigation_id, content)
+    SELECT id, query || ' ' || COALESCE((
+        SELECT group_concat(json_extract(value, '$.title') || ' ' ||
+            substr(json_extract(value, '$.original_text'), 1, 12000), ' ')
+        FROM json_each(snapshot, '$.results')
+    ), '') FROM investigations;
+    """,
 ]
 
 

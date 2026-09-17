@@ -10,6 +10,41 @@ from tractor.sources.registries import Wikidata
 
 def api_fixture(request):
     host = request.url.host
+    if host == "api.gdeltproject.org":
+        return httpx.Response(
+            200,
+            json={
+                "articles": [
+                    {
+                        "title": "Acme news",
+                        "url": "https://example.org/news",
+                        "language": "English",
+                        "sourcecountry": "United Kingdom",
+                        "seendate": "20240917T120000Z",
+                    }
+                ]
+            },
+        )
+    if host == "www.ebi.ac.uk":
+        return httpx.Response(
+            200,
+            json={
+                "hitCount": 1,
+                "resultList": {
+                    "result": [
+                        {
+                            "title": "Acme study",
+                            "source": "MED",
+                            "id": "123",
+                            "pmid": "123",
+                            "abstractText": "<p>Acme research.</p>",
+                            "doi": "10.1000/acme",
+                            "language": "eng",
+                        }
+                    ]
+                },
+            },
+        )
     if host == "api.github.com":
         return httpx.Response(
             200,

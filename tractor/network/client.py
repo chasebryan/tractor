@@ -13,8 +13,17 @@ from tractor.core.deduplication import normalize_url
 from tractor.network.throttling import RateLimiter
 from tractor.storage.cache import ResponseCache
 
-USER_AGENT = "TRACTOR/0.1 (+https://github.com/chasebryan/tractor; public research)"
-API_HOSTS = frozenset({"api.github.com", "api.crossref.org", "archive.org", "www.wikidata.org"})
+USER_AGENT = "TRACTOR/0.2 (+https://github.com/chasebryan/tractor; public research)"
+API_HOSTS = frozenset(
+    {
+        "api.github.com",
+        "api.crossref.org",
+        "archive.org",
+        "www.wikidata.org",
+        "www.ebi.ac.uk",
+        "api.gdeltproject.org",
+    }
+)
 
 
 class NetworkPolicyError(ValueError):
@@ -38,12 +47,14 @@ class NetworkClient:
         cache: ResponseCache | None = None,
         *,
         allowed_hosts: frozenset[str] = API_HOSTS,
+        allowed_origins: frozenset[str] = frozenset(),
         transport: httpx.AsyncBaseTransport | None = None,
         proxy: str | None = None,
         tor: bool = False,
     ):
         self.cache = cache
         self.allowed_hosts = allowed_hosts
+        self.allowed_origins = allowed_origins
         self.tor = tor
         if tor and (not proxy or not proxy.startswith("socks5h://")):
             raise NetworkPolicyError("Tor requires an explicit socks5h proxy with remote DNS.")
@@ -69,6 +80,8 @@ class NetworkClient:
         onion = host.endswith(".onion")
         if self.tor != onion:
             raise NetworkPolicyError("Onion and clearnet requests require separate clients.")
+        if not self.tor and f"{parts.scheme}://{parts.netloc}" in self.allowed_origins:
+            return normalized
         if host not in self.allowed_hosts:
             raise NetworkPolicyError("Host is not registered in this network context.")
         if parts.port not in (None, 80, 443):

@@ -33,27 +33,55 @@ class InvestigationView(QDialog):
             for key, value in inv.coverage.items()
         )
         coverage += f"\n\nStatus: {inv.status}\n{inv.stop_reason}\n"
-        coverage += f"\nNew unique records per completed pass: {inv.pass_yields}\n"
+        coverage += f"\nNew unique records by discovery pass: {inv.pass_yields}\n"
+        if inv.previous_investigation:
+            coverage += f"\nRefreshed from investigation: {inv.previous_investigation}\n"
+        coverage += "\nCoverage notes\n" + (
+            "\n".join(inv.limits) or "No additional limits reported."
+        )
         coverage += "\nInvestigation limits\n" + "\n".join(
             f"{key.replace('_', ' ').replace('max ', 'Maximum ').capitalize()}: {value}"
             for key, value in inv.budget.items()
         )
         tabs.addTab(text_panel(coverage), "Coverage")
         attempts = QTreeWidget()
-        attempts.setHeaderLabels(["Source / query", "Pass", "Status", "Records", "Details"])
+        attempts.setHeaderLabels(
+            ["Source / query", "Run / pass / page", "Status", "Records", "Details"]
+        )
         for a in inv.attempts:
             item = QTreeWidgetItem(
                 [
                     f"{a.provider} · {a.query}",
-                    str(a.pass_number),
+                    f"{a.run_number} / {a.pass_number} / {a.page}",
                     a.status,
                     str(a.result_count),
-                    a.error or ("Provider response limited" if a.truncated else ""),
+                    a.error
+                    or (
+                        f"{a.duration_ms / 1000:.1f}s · {a.cached_requests} cached · "
+                        f"{a.network_requests} requests"
+                        + (" · more matches available" if a.truncated else "")
+                    ),
                 ]
             )
             attempts.addTopLevelItem(item)
         attempts.setColumnWidth(0, 360)
         tabs.addTab(attempts, "Source attempts")
+        pending = QTreeWidget()
+        pending.setHeaderLabels(["Provider", "Query", "Pass", "Next page"])
+        names = {v.id: v.value for v in inv.plan.variants}
+        for task in inv.pending_tasks:
+            pending.addTopLevelItem(
+                QTreeWidgetItem(
+                    [
+                        task.provider,
+                        names.get(task.query_id, task.query_id),
+                        str(task.pass_number),
+                        str(task.page),
+                    ]
+                )
+            )
+        pending.setColumnWidth(1, 380)
+        tabs.addTab(pending, f"Remaining work ({len(inv.pending_tasks)})")
         variants = QTreeWidget()
         variants.setHeaderLabels(["Query variant", "Language", "State", "Why it exists"])
         for v in inv.plan.variants:

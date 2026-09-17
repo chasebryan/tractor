@@ -43,6 +43,12 @@ class SourceView(QDialog):
                 path.append(f"SOURCE: {r.title}\n  {r.url}")
         evidence = "\n\n↓\n\n".join(path)
         evidence += "\n\nRANKING (relevance, not a probability)\n"
+        ranking = result.metadata.get("ranking", {})
+        if ranking:
+            evidence += (
+                f"Query basis: {ranking.get('query', '')} [{ranking.get('query_state', '')}]\n"
+            )
+            evidence += ranking.get("note", "") + "\n\n"
         evidence += "\n".join(
             f"{key.replace('_', ' ')}: {value:g}" for key, value in result.score_breakdown.items()
         )

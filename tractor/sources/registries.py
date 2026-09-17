@@ -24,6 +24,7 @@ class Wikidata:
                 "language": language,
                 "uselang": language,
                 "limit": min(context.limit, 10),
+                **({"continue": context.cursor} if context.cursor else {}),
             },
             stats=context.stats,
         )
@@ -47,7 +48,10 @@ class Wikidata:
         )
         if "error" in details:
             raise SourceUnavailable("Wikidata entity API error")
-        batch = SearchBatch(truncated="search-continue" in data)
+        batch = SearchBatch(
+            truncated="search-continue" in data,
+            next_cursor=str(data["search-continue"]) if "search-continue" in data else None,
+        )
         for hit in hits:
             if hit["id"] not in ids:
                 continue

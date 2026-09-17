@@ -8,11 +8,12 @@ class GitHubRepositories:
     description = "Public repository names and descriptions; no authenticated code search."
 
     async def search(self, query: QueryVariant, context: SearchContext) -> SearchBatch:
+        page = int(context.cursor or "1")
         # Treat punctuation as ordinary search text, not provider-specific operators.
         term = query.value.replace('"', " ").replace(":", " ")
         data = await context.client.get_json(
             "https://api.github.com/search/repositories",
-            {"q": f'"{term}"', "per_page": context.limit},
+            {"q": f'"{term}"', "per_page": context.limit, "page": page},
             interval=6.2,
             stats=context.stats,
         )
@@ -37,6 +38,11 @@ class GitHubRepositories:
         return SearchBatch(
             results,
             truncated=(
-                bool(data.get("incomplete_results")) or data.get("total_count", 0) > len(results)
+                bool(data.get("incomplete_results"))
+                or data.get("total_count", 0) > page * context.limit
             ),
+            next_cursor=str(page + 1)
+            if results and page * context.limit < min(data.get("total_count", 0), 1000)
+            else None,
+            total_available=data.get("total_count"),
         )

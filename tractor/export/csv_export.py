@@ -2,6 +2,7 @@ import csv
 from pathlib import Path
 
 from tractor.core.models import Investigation
+from tractor.storage.atomic import atomic_text
 
 
 def safe_cell(value: object) -> str:
@@ -22,7 +23,7 @@ def export_csv(inv: Investigation, path: Path) -> None:
         "relevance_score",
         "duplicate_of",
     ]
-    with path.open("w", newline="", encoding="utf-8-sig") as file:
+    with atomic_text(path, newline="", encoding="utf-8-sig") as file:
         writer = csv.writer(file)
         writer.writerow(fields)
         for result in inv.results:

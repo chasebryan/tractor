@@ -119,6 +119,22 @@ class Attempt:
     cached_requests: int = 0
     network_requests: int = 0
     truncated: bool = False
+    task_id: str = ""
+    page: int = 1
+    cursor: str | None = None
+    run_number: int = 1
+    rejected_count: int = 0
+    page_fingerprint: str = ""
+
+
+@dataclass
+class RetrievalTask:
+    provider: str
+    query_id: str
+    pass_number: int = 1
+    page: int = 1
+    cursor: str | None = None
+    id: str = field(default_factory=new_id)
 
 
 @dataclass
@@ -137,6 +153,12 @@ class Investigation:
     attempts: list[Attempt] = field(default_factory=list)
     pass_yields: list[int] = field(default_factory=list)
     budget: dict[str, Any] = field(default_factory=dict)
+    pending_tasks: list[RetrievalTask] = field(default_factory=list)
+    source_ids: list[str] = field(default_factory=list)
+    source_context: dict[str, str] = field(default_factory=dict)
+    runs: int = 1
+    limits: list[str] = field(default_factory=list)
+    previous_investigation: str | None = None
 
     @property
     def unique_results(self) -> list[SourceResult]:
@@ -169,16 +191,21 @@ class Investigation:
             "secondary_pivots": len({a.query_id for a in self.attempts if a.pass_number > 1}),
             "investigation_passes": self.passes,
             "limited_responses": sum(a.truncated for a in self.attempts),
+            "pages_retrieved": sum(a.status == "success" for a in self.attempts),
+            "pending_searches": len(self.pending_tasks),
+            "invalid_records_skipped": sum(a.rejected_count for a in self.attempts),
+            "runs": self.runs,
         }
 
     def to_dict(self) -> dict[str, Any]:
-        return {**asdict(self), "coverage": self.coverage, "schema_version": 1}
+        return {**asdict(self), "coverage": self.coverage, "schema_version": 2}
 
     @classmethod
     def from_dict(cls, value: dict[str, Any]) -> Investigation:
         data = dict(value)
         data.pop("coverage", None)
         data.pop("schema_version", None)
+        data["pending_tasks"] = [RetrievalTask(**v) for v in data.get("pending_tasks", [])]
         plan = data.pop("plan")
         data["plan"] = QueryPlan(plan["seed"], [QueryVariant(**v) for v in plan["variants"]])
         for name, model in (
