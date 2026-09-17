@@ -58,6 +58,14 @@ class SourceView(QDialog):
             f"SHA-256 of supplied text: {result.content_hash}\n"
             f"First observed: {result.discovered_at}"
         )
+        evidence += "\n\nDISCOVERY PATHS (not factual corroboration)\n"
+        for item in result.metadata.get("discovery_observations", []):
+            evidence += (
+                f"\n{item['provider']} · page {item.get('search_page', '?')} · "
+                f"native rank {item.get('provider_rank', 'unavailable')}\n"
+                f"{item['url']}\nQueries: {', '.join(item.get('queries', []))}\n"
+                f"Indexes: {', '.join(item.get('independent_index_families', [])) or 'Unknown'}\n"
+            )
         tabs.addTab(text_panel(evidence), "Evidence and ranking")
         related_lines = ["Shared identifiers are observations, not proof of shared identity.", ""]
         for entity in inv.entities:

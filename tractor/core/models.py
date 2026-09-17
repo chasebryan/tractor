@@ -6,6 +6,8 @@ from enum import StrEnum
 from typing import Any
 from uuid import uuid4
 
+from tractor.credentials import redact
+
 
 def new_id() -> str:
     return uuid4().hex
@@ -44,6 +46,11 @@ class QueryVariant:
     reason: str = ""
     evidence_urls: list[str] = field(default_factory=list)
     id: str = field(default_factory=new_id)
+    kind: str = "seed"
+    origin: str = "user"
+    script: str = "Zyyy"
+    transliteration_of: str | None = None
+    target_domain: str = ""
 
 
 @dataclass
@@ -126,6 +133,13 @@ class Attempt:
     rejected_count: int = 0
     page_fingerprint: str = ""
     network: str = "clearnet"
+    error_category: str | None = None
+    rate_limit_events: int = 0
+    warnings: list[str] = field(default_factory=list)
+    unique_yield: int = 0
+    duplicate_yield: int = 0
+    finished_at: str = ""
+    scheduling_score: float = 0.0
 
 
 @dataclass
@@ -160,6 +174,10 @@ class Investigation:
     runs: int = 1
     limits: list[str] = field(default_factory=list)
     previous_investigation: str | None = None
+    provider_configuration: dict[str, Any] = field(default_factory=dict)
+    provider_health: dict[str, Any] = field(default_factory=dict)
+    search_options: dict[str, Any] = field(default_factory=dict)
+    profile: str = "Custom"
 
     @property
     def unique_results(self) -> list[SourceResult]:
@@ -170,6 +188,8 @@ class Investigation:
 
     @property
     def coverage(self) -> dict[str, Any]:
+        from tractor.core.diversity import diversity
+
         attempted = {a.provider for a in self.attempts}
         successful = {a.provider for a in self.attempts if a.status == "success"}
         failed = {a.provider for a in self.attempts if a.status == "error"}
@@ -178,6 +198,11 @@ class Investigation:
             "sources_successful": len(successful),
             "sources_unavailable": len(failed - successful),
             "sources_with_errors": len(failed),
+            "partial_responses": sum(a.status == "partial" for a in self.attempts),
+            "skipped_searches": sum(a.status == "skipped" for a in self.attempts),
+            "rate_limit_events": sum(a.rate_limit_events for a in self.attempts),
+            "provider_warnings": sorted({w for a in self.attempts for w in a.warnings}),
+            **diversity(self.results),
             "queries_issued": len(self.attempts),
             "network_requests": sum(a.network_requests for a in self.attempts),
             "cached_requests": sum(a.cached_requests for a in self.attempts),
@@ -207,7 +232,7 @@ class Investigation:
         }
 
     def to_dict(self) -> dict[str, Any]:
-        return {**asdict(self), "coverage": self.coverage, "schema_version": 2}
+        return redact({**asdict(self), "coverage": self.coverage, "schema_version": 3})
 
     @classmethod
     def from_dict(cls, value: dict[str, Any]) -> Investigation:

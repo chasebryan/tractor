@@ -26,6 +26,16 @@ MIGRATIONS = [
         FROM json_each(snapshot, '$.results')
     ), '') FROM investigations;
     """,
+    """
+    CREATE TABLE provider_health (
+        investigation_id TEXT NOT NULL, task_id TEXT NOT NULL, run_number INTEGER NOT NULL,
+        provider TEXT NOT NULL, status TEXT NOT NULL, duration_ms INTEGER NOT NULL,
+        error_category TEXT, rate_limits INTEGER NOT NULL, unique_yield INTEGER NOT NULL,
+        duplicate_yield INTEGER NOT NULL, finished_at TEXT NOT NULL,
+        PRIMARY KEY (investigation_id, task_id, run_number)
+    );
+    CREATE INDEX provider_health_recent ON provider_health(provider, finished_at DESC);
+    """,
 ]
 
 

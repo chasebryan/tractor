@@ -16,6 +16,11 @@ from tractor.core.models import SourceResult
 from tractor.ui.theme import label
 
 PROVIDERS = {
+    "brave": "Brave Search",
+    "mojeek": "Mojeek",
+    "kagi": "Kagi",
+    "marginalia": "Marginalia",
+    "common_crawl": "Common Crawl",
     "europe_pmc": "Europe PMC",
     "gdelt": "GDELT News",
     "github": "GitHub",
@@ -99,6 +104,17 @@ class ResultCard(QFrame):
         self.metadata.setText(
             f"{provider}   ·   {(result.published_at or 'Undated')[:10]}   ·   "
             f"{language_name(result.original_language)}"
+        )
+        observations = result.metadata.get("discovery_observations", [])
+        indexes = {
+            family for item in observations for family in item.get("independent_index_families", [])
+        }
+        if len(indexes) > 1:
+            self.metadata.setText(
+                self.metadata.text() + f"   ·   {len(indexes)} independent indexes"
+            )
+        self.metadata.setToolTip(
+            "Discovery agreement is not factual corroboration. See Evidence for each path."
         )
         self.excerpt.setText(result.excerpt[:380] or "Metadata record. Open evidence for details.")
         domain = urlsplit(result.url).hostname or ""

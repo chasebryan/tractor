@@ -1,4 +1,11 @@
-from PySide6.QtWidgets import QDialog, QTabWidget, QTreeWidget, QTreeWidgetItem, QVBoxLayout
+from PySide6.QtWidgets import (
+    QDialog,
+    QHBoxLayout,
+    QTabWidget,
+    QTreeWidget,
+    QTreeWidgetItem,
+    QVBoxLayout,
+)
 
 from tractor.core.models import Investigation
 from tractor.ui.source_view import text_panel
@@ -22,6 +29,22 @@ class InvestigationView(QDialog):
             )
         )
         tabs = QTabWidget()
+        metrics = QHBoxLayout()
+        for count, title in (
+            (len(inv.unique_results), "UNIQUE RECORDS"),
+            (len(inv.coverage["known_independent_search_indexes"]), "KNOWN INDEPENDENT INDEXES"),
+            (len(inv.coverage["domains_represented"]), "HOST DOMAINS"),
+            (len(inv.pending_tasks), "SEARCHES PENDING"),
+        ):
+            metrics.addWidget(label(f"{count:,}\n{title}", "muted", True))
+        layout.addLayout(metrics)
+        layout.addWidget(
+            label(
+                "Multiple indexes are discovery paths, not independent factual confirmation.",
+                "muted",
+                True,
+            )
+        )
 
         def display_value(value: object) -> str:
             if isinstance(value, list):
@@ -34,6 +57,10 @@ class InvestigationView(QDialog):
         )
         coverage += f"\n\nStatus: {inv.status}\n{inv.stop_reason}\n"
         coverage += f"\nNew unique records by discovery pass: {inv.pass_yields}\n"
+        coverage += f"\nProfile: {inv.profile}\n"
+        coverage += "\n".join(
+            f"{key.replace('_', ' ')}: {value}" for key, value in inv.search_options.items()
+        )
         if inv.previous_investigation:
             coverage += f"\nRefreshed from investigation: {inv.previous_investigation}\n"
         coverage += "\nCoverage notes\n" + (
@@ -44,6 +71,52 @@ class InvestigationView(QDialog):
             for key, value in inv.budget.items()
         )
         tabs.addTab(text_panel(coverage), "Coverage")
+        providers = QTreeWidget()
+        providers.setHeaderLabels(
+            ["Provider", "Configuration", "Attempts", "Unique / duplicate", "Recent health"]
+        )
+        for key in dict.fromkeys([*inv.provider_configuration, *inv.source_ids]):
+            state = inv.provider_configuration.get(key, {})
+            rows = [a for a in inv.attempts if a.provider == key]
+            health = inv.provider_health.get(key, {})
+            item = QTreeWidgetItem(
+                [
+                    state.get("name", key),
+                    ("Enabled · " if state.get("enabled", True) else "Disabled · ")
+                    + state.get("configuration", "Not recorded"),
+                    str(len(rows)),
+                    f"{sum(a.unique_yield for a in rows)} / {sum(a.duplicate_yield for a in rows)}",
+                    (
+                        f"{health['success_rate']:.0%} success · "
+                        f"{health['median_latency_ms'] / 1000:.1f}s median"
+                        if health
+                        else "No completed requests"
+                    ),
+                ]
+            )
+            for note in sorted({note for a in rows for note in a.warnings}):
+                item.addChild(QTreeWidgetItem([note]))
+            if health.get("last_error_class"):
+                item.addChild(
+                    QTreeWidgetItem(["Latest error class: " + health["last_error_class"]])
+                )
+            if state.get("capabilities"):
+                item.addChild(
+                    QTreeWidgetItem(
+                        [
+                            "Supports: "
+                            + ", ".join(
+                                k.replace("_", " ")
+                                for k, supported in state["capabilities"].items()
+                                if supported
+                            )
+                        ]
+                    )
+                )
+            providers.addTopLevelItem(item)
+        providers.setColumnWidth(0, 230)
+        providers.setColumnWidth(1, 240)
+        tabs.addTab(providers, "Providers and health")
         attempts = QTreeWidget()
         attempts.setHeaderLabels(
             ["Source / query", "Network", "Run / pass / page", "Status", "Records", "Details"]
@@ -56,7 +129,7 @@ class InvestigationView(QDialog):
                     f"{a.run_number} / {a.pass_number} / {a.page}",
                     a.status,
                     str(a.result_count),
-                    a.error
+                    (a.error or "; ".join(a.warnings))
                     or (
                         f"{a.duration_ms / 1000:.1f}s · {a.cached_requests} cached · "
                         f"{a.network_requests} requests"
@@ -84,9 +157,15 @@ class InvestigationView(QDialog):
         pending.setColumnWidth(1, 380)
         tabs.addTab(pending, f"Remaining work ({len(inv.pending_tasks)})")
         variants = QTreeWidget()
-        variants.setHeaderLabels(["Query variant", "Language", "State", "Why it exists"])
+        variants.setHeaderLabels(
+            ["Query variant", "Language / script", "State / kind", "Why it exists"]
+        )
         for v in inv.plan.variants:
-            variants.addTopLevelItem(QTreeWidgetItem([v.value, v.language, v.state, v.reason]))
+            variants.addTopLevelItem(
+                QTreeWidgetItem(
+                    [v.value, f"{v.language} / {v.script}", f"{v.state} / {v.kind}", v.reason]
+                )
+            )
         variants.setColumnWidth(0, 250)
         variants.setColumnWidth(3, 600)
         tabs.addTab(variants, "Query plan")

@@ -11,7 +11,8 @@ from tractor.core.models import QueryVariant, SourceResult, SourceType
 from tractor.network.client import SourceUnavailable
 from tractor.network.tor import onion_host
 from tractor.sources.base import SearchBatch, SearchContext
-from tractor.sources.parsing import plain_text
+from tractor.sources.capabilities import ProviderCapabilities
+from tractor.sources.search.searxng import SearxNG
 
 TORCH_HOST = "xmh57jrknzkhv6y3ls3ubitzfqnkrwxhopf5aygthi7d6rplyvk3noyd.onion"
 TORCH_URL = "http://" + TORCH_HOST
@@ -205,75 +206,18 @@ class TorchSearch:
         )
 
 
-class OnionSearxNG:
+class OnionSearxNG(SearxNG):
     id = "onion_searxng"
     name = "SearxNG · Tor onion metasearch"
-    description = "Searches the onions category of your own onion-hosted SearxNG server."
+    description = "Searches the onions category of your onion-hosted SearxNG server."
     network = "tor"
+    capabilities = ProviderCapabilities(onion=True, pagination=True, languages=True, freshness=True)
 
-    def __init__(self, endpoint: str):
-        self.endpoint = endpoint.rstrip("/") + "/search"
+    def __init__(self, endpoint, options=None, credentials=None):
+        super().__init__(endpoint, options, credentials)
         self.onion_hosts = frozenset({onion_host(self.endpoint)})
-        self.identity = self.endpoint
 
-    async def search(self, query: QueryVariant, context: SearchContext) -> SearchBatch:
+    async def search(self, query, context):
         if not context.client.tor:
             raise SourceUnavailable("This source requires the separate Tor connection.")
-        position = (context.cursor or "1:0").split(":")
-        page, offset = int(position[0]), int(position[1]) if len(position) > 1 else 0
-        if page < 1 or offset < 0 or page > 1000:
-            raise SourceUnavailable("The onion metasearch page cursor is invalid.")
-        data = await context.client.get_json(
-            self.endpoint,
-            {
-                "q": query.value,
-                "format": "json",
-                "pageno": page,
-                "language": "all",
-                "categories": "onions",
-            },
-            interval=2,
-            ttl=900,
-            stats=context.stats,
-        )
-        if not isinstance(data, dict) or not isinstance(data.get("results"), list):
-            raise SourceUnavailable("Onion metasearch did not return its search-result contract.")
-        if data.get("unresponsive_engines"):
-            raise SourceUnavailable(
-                "An upstream onion index did not respond. Retry this page when the server is ready."
-            )
-        items = [
-            item
-            for item in data["results"]
-            if isinstance(item, dict) and safe_onion_url(item.get("url", ""))
-        ]
-        if data["results"] and not items:
-            raise SourceUnavailable(
-                "The server returned no onion links. Check its enabled onion engines."
-            )
-        results = []
-        for item in items[offset : offset + context.limit]:
-            address = safe_onion_url(item.get("url", ""))
-            if address:
-                results.append(
-                    SourceResult(
-                        title=plain_text(item.get("title", "Onion result")),
-                        url=address,
-                        source_type=SourceType.ONION,
-                        source_provider=self.id,
-                        original_text=plain_text(item.get("content", "")),
-                        metadata={
-                            "network": "tor",
-                            "index_url": self.identity,
-                            "search_engines": item.get("engines", []),
-                            "api_record": item,
-                            "scope": "Onion search-index snippet; destination page not retrieved",
-                        },
-                    )
-                )
-        more_on_page = offset + context.limit < len(items)
-        next_cursor = f"{page}:{offset + context.limit}" if more_on_page else f"{page + 1}:0"
-        # Ignore ordinary web URLs returned by misconfigured onion engines.
-        return SearchBatch(
-            results, truncated=bool(items), next_cursor=next_cursor if items else None
-        )
+        return await super().search(query, context)

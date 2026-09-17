@@ -1,6 +1,6 @@
 # TRACTOR
 
-**Global Intelligence Search · v0.3**
+**Global Intelligence Search · v0.4**
 
 A native desktop application for evidence-led research across independent public sources. Enter one subject. The engine builds a query plan, retrieves successive result pages, follows traceable multilingual candidates, groups duplicate records, and saves the evidence and unfinished work on your device.
 
@@ -8,7 +8,9 @@ The launch screen has one wordmark and one search field. Results, source coverag
 
 ## Download and run
 
-[Download the application source](https://github.com/chasebryan/tractor/archive/refs/heads/tractor-mvp.zip), extract it, and install **Python 3.11–3.13** (3.12 recommended). The built-in providers require no API keys.
+Get a versioned native bundle or source archive from [GitHub Releases](https://github.com/chasebryan/tractor/releases). Native bundles include Python and dependencies: extract the complete archive and open Tractor. See [platform instructions and verification limits](docs/releases.md).
+
+For source installation, extract a release source archive and install **Python 3.11–3.13** (3.12 recommended). The original public APIs and Torch need no keys; the new premium search providers are optional.
 
 **Linux and macOS:** open a terminal in the extracted folder and run:
 
@@ -20,17 +22,17 @@ sh run.sh
 
 The launcher creates a private `.venv` and installs dependencies on the first run. Later launches reuse it; dependency changes trigger installation again. First-time setup requires internet access. The desktop application makes no network requests until you start a search.
 
-On Fedora, install a supported interpreter with `sudo dnf install python3.12`. The launcher also accepts Python 3.11 and 3.13; Python 3.14 is not supported by the Qt version used here. Qt 6.8 is pinned for older desktop CPU compatibility. Linux requires desktop graphics libraries; minimal systems may need EGL, OpenGL, and Qt xcb dependencies. Wayland is also supported. Linux has been exercised directly; Windows and macOS launchers need platform verification. Signed native installers are not included.
+On Fedora, install a supported interpreter with `sudo dnf install python3.12`. The launcher also accepts Python 3.11 and 3.13; Python 3.14 is not supported by the Qt version used here. Qt 6.8 is pinned for older desktop CPU compatibility. Linux requires desktop graphics libraries; minimal systems may need EGL, OpenGL, and Qt xcb dependencies. Wayland is also supported. CI checks Linux, Windows and macOS independently. Native bundles are unsigned and not notarized; see the release workflow results for verified platforms.
 
-To clone or update the development branch:
+To clone or update the development source:
 
 ```bash
-git clone --branch tractor-mvp https://github.com/chasebryan/tractor.git
+git clone https://github.com/chasebryan/tractor.git
 cd tractor
 sh run.sh
 ```
 
-For an existing checkout on that branch, run `git pull --ff-only`, then `sh run.sh` again.
+For an existing checkout on main, run `git pull --ff-only`, then `sh run.sh` again.
 
 Manual installation is also supported:
 
@@ -60,6 +62,11 @@ Shortcuts: **Ctrl+L** focuses the search, **Esc** stops retrieval, **Ctrl+E** ex
 
 | Provider | Coverage | Reference |
 | --- | --- | --- |
+| Brave, optional | Independent web search with API credentials | [Brave API](https://api-dashboard.search.brave.com/app/documentation/web-search) |
+| Mojeek, optional | Independent web search; storage-eligible API plan required | [Mojeek API](https://www.mojeek.com/support/api/search/request_parameters.html) |
+| Kagi, optional | Current v1 standard search, with account personalization | [Kagi API](https://kagi.com/api/docs/) |
+| Marginalia, optional | Independent small-web search; public development or private key | [Marginalia API](https://about.marginalia-search.com/article/api/) |
+| Common Crawl, optional | Known URL/domain capture metadata; no full-content downloads | [Common Crawl index](https://index.commoncrawl.org/) |
 | Wikidata | Knowledge records and multilingual labels; not an official company registry | [Wikibase API](https://www.mediawiki.org/wiki/Wikibase/API) |
 | Crossref | Publication metadata, available abstracts, DOI identifiers | [Crossref REST API](https://www.crossref.org/documentation/retrieve-metadata/rest-api/) |
 | Internet Archive | Archived item catalog metadata; not a Wayback-wide crawl | [Internet Archive developer portal](https://archive.org/developers/) |
@@ -74,7 +81,17 @@ Select providers in **Settings**. Desktop and command-line searches use the same
 
 To enable general web search, enter a SearxNG server URL in Settings and select its checkbox. Use a server you operate or trust, with JSON output enabled. Many public instances disable JSON access. HTTPS is required except for a local loopback server such as `http://127.0.0.1:8080`. Queries also reach the upstream engines selected by that server. No public instance is selected automatically. Changing the configured server requires a fresh investigation for that source; saved cursors are not silently sent to a different server.
 
-The built-in services do not form a general web index. News metadata is not full article text; GDELT's seen time is retained as an observation time, not invented as a publication date. Third-party coverage, availability, and indexing vary.
+Web providers add search-index discovery; specialized APIs retain their narrower scopes. News metadata is not full article text; GDELT's seen time is retained as an observation time, not invented as a publication date. Third-party coverage, availability, and indexing vary.
+
+## Coverage controls
+
+Settings groups **Web search**, **Specialized sources** and **Tor**. API keys come from `TRACTOR_BRAVE_API_KEY`, `TRACTOR_MOJEEK_API_KEY`, `TRACTOR_KAGI_API_KEY` and optional `TRACTOR_MARGINALIA_API_KEY`; set them before launch. Keys are never saved in settings or SQLite. Mojeek additionally requires confirmation that your plan permits persistent storage.
+
+Choose General, Academic, Historical, Code, News or Maximum coverage profiles, or keep a custom provider selection. Language, region, freshness and budgets are configurable. Maximum coverage increases bounded work; it cannot promise completeness and may use more paid requests. Unsupported API controls appear as Coverage warnings.
+
+Coverage shows configuration, local health, independent discovery indexes, domains, languages, warnings and remaining pages. A shared page found by two engines remains one evidence item with both discovery paths. SearxNG partial responses retain useful records and retry the same page. Common Crawl requires a known URL/domain, records capture time separately from publication time, and never downloads archive content.
+
+Read the [provider matrix and official API references](docs/providers.md), [benchmark scope](docs/benchmarks.md), [provider SDK](docs/provider-sdk.md), [changelog](CHANGELOG.md), and [explicitly deferred milestones](docs/roadmap.md).
 
 ## Search Tor
 
@@ -97,13 +114,13 @@ Torch's robots policy is checked through Tor before a search. Disallowed routes,
 
 **A persistent work queue.** Each unit records provider, query, discovery pass, page, and cursor. Successful pages are checkpointed into SQLite. Interrupted pages remain queued. Continuation retries unfinished work without repeating successful pages. A provider has at most one active search; other providers can run concurrently. Repeated pages and cursors stop with an explicit coverage note.
 
-Each run permits up to 72 adapter searches, 3 pages per provider/query, 240 seconds, and 6 concurrent jobs. Investigations are bounded to 3 discovery passes, 12 query variants, and 3,000 retained records; each retrieval accepts up to 15 records. These are resource ceilings, not completeness claims. **Continue** renews the per-run page, query, and time budgets. The record cap remains investigation-wide. Provider-specific caps and unavailable pagination are disclosed. GitHub exposes at most 1,000 search hits; Crossref's offset retrieval is bounded at 10,000. Torch continuation is bounded at offset 10,000; its reported total is an index estimate. GDELT does not paginate in this implementation.
+Default budgets permit up to 72 adapter searches, 3 pages per provider/query, 240 seconds, and 6 concurrent jobs. Investigations are bounded to 3 discovery passes, 12 query variants, and 3,000 retained records; each retrieval accepts up to 15 records. These are resource ceilings, not completeness claims. **Continue** renews the per-run page, query, and time budgets. The record cap remains investigation-wide. Provider-specific caps and unavailable pagination are disclosed. GitHub exposes at most 1,000 search hits; Crossref's offset retrieval is bounded at 10,000. Torch continuation is bounded at offset 10,000; its reported total is an index estimate. GDELT does not paginate in this implementation.
 
 Requests are rate-limited per host (GitHub: at least 6.2 seconds apart), with bounded retries, backoff, response sizes, caching, and connection/read timeouts. Multiple application instances have separate rate limiters. Refresh bypasses the saved HTTP cache.
 
 **Traceable candidates.** The seed is user-supplied. Legal-suffix spelling changes and mechanical transliterations are hypotheses. An exact textual match to a Wikidata label can produce foreign-language candidates, each linked to a source and marked **discovered**, not confirmed. Matching names do not establish that a record describes the intended subject. Multiple URLs alone never promote an alias to corroborated. Discovery depth and variant limits appear in coverage notes.
 
-Language detection leaves short names undetermined. Provider-declared languages are retained, with common Europe PMC language codes normalized. Multilingual Wikidata labels are requested in ten configured languages, independently of browser or OS locale. Original text is never overwritten. A tested `TranslationBackend` protocol is available for integrations; **no machine-translation service is enabled**.
+Language detection leaves short names undetermined. Provider-declared languages are retained, with common Europe PMC language codes normalized. Multilingual Wikidata labels are requested in 25 configured languages, independently of browser or OS locale. Original text is never overwritten. A tested `TranslationBackend` protocol is available for integrations; **no machine-translation service is enabled**.
 
 **Duplicate grouping.** An index matches canonical URLs, stable identifiers such as DOI and PubMed IDs, exact substantial content hashes, and bounded near-text comparisons. Conflicting stable identifiers prevent text-only merging. Short or empty metadata does not collapse unrelated records. Duplicate copies and their discovery paths remain stored and exported. Near-text matches are marked as inferences. Semantic matching of translated copies is not implemented.
 
@@ -117,6 +134,13 @@ The same engine runs without opening Qt windows:
 
 ```bash
 tractor --search "OpenStreetMap" --export-json investigation.json
+tractor --providers
+tractor --test-provider common_crawl
+tractor --benchmark
+tractor --search "OpenStreetMap" --profile General --language fr --max-jobs 100
+tractor --search example.org --sources common_crawl --export-markdown captures.md
+tractor --coverage INVESTIGATION_ID
+tractor --refresh INVESTIGATION_ID --export-csv refreshed.csv
 tractor --history
 tractor --history "cartography"
 tractor --resume INVESTIGATION_ID --export-json continued.json
@@ -129,9 +153,9 @@ From a launcher installation, replace `tractor` with `.venv/bin/tractor` on Linu
 
 ## Storage, exports, and privacy
 
-SQLite stores atomic investigation snapshots, individual record projections, cached responses, and a local full-text history index. Existing v0.1 history migrates automatically. Older investigations without saved cursors can be reopened and refreshed. A stopped application leaves unfinished investigations visibly marked as interrupted.
+SQLite stores atomic investigation snapshots, individual record projections, cached responses, and a local full-text history index. Existing v0.1–v0.3 history migrates automatically to database schema 3. Back up the data directory before upgrading; older application versions cannot open a newer database schema. Older investigations without saved cursors can be reopened and refreshed. A stopped application leaves unfinished investigations visibly marked as interrupted.
 
-JSON preserves results, duplicates, source payloads, query states, entities, edges, attempts, budgets, source configuration, and remaining tasks. Markdown includes sources, coverage, trails, attempts, and limits. CSV includes every retained result with a duplicate reference and neutralizes spreadsheet formulas. Exports are atomically replaced only after a complete write.
+JSON preserves results, duplicates, source payloads, query states, entities, edges, attempts, budgets, source configuration, and remaining tasks. Markdown includes sources, coverage, trails, attempts, and limits. CSV includes every retained result, discovery/provider metadata and a duplicate reference and neutralizes spreadsheet formulas. Exports are atomically replaced only after a complete write.
 
 No telemetry, advertising, history upload, stored API credentials, or background searching. Search terms and discovered variants go to enabled providers; direct providers can observe your IP and all providers apply their own policies. Onion providers receive searches through the separate Tor connection. Enabling onion search does not route the other providers through Tor. Investigations, cache, and exports are stored unencrypted. Default data location comes from `platformdirs` (`~/.local/share/TRACTOR` on typical Linux systems); Settings shows the exact location. Remove that directory while the app is closed to delete history, cache, and settings. Structured logs use query IDs rather than full queries or raw provider error bodies.
 
@@ -149,7 +173,9 @@ tractor/
   language/              Detection, transliteration, translation protocol
   analysis/              Observed identifier relationships
   network/               Pooling, Tor lifecycle, route isolation, retries, robots policy
-  storage/               SQLite migrations, full-text history, cache, atomic file writes
+  credentials.py         Environment and secure-store credential abstraction
+  benchmark/             Versioned offline retrieval regression fixtures
+  storage/               Local health, SQLite migrations, full-text history, cache, atomic file writes
   export/                JSON, CSV, and Markdown reports
 scripts/launch.py         First-run environment setup
 ```
@@ -166,8 +192,8 @@ QT_QPA_PLATFORM=offscreen pytest -q
 python -m build
 ```
 
-Deterministic tests block live HTTP and exercise provider contracts, pagination, continuation, cancellation, provenance, ranking, deduplication, network boundaries, migrations, exports, and real Qt widgets. CI targets Python 3.11, 3.12, and 3.13 on Linux. Live-service checks are separate.
+Deterministic tests block live HTTP and exercise provider contracts, pagination, continuation, cancellation, provenance, ranking, deduplication, network boundaries, migrations, exports, and real Qt widgets. CI targets Python 3.11, 3.12, and 3.13 on Ubuntu, Windows and macOS, with dependency auditing and native smoke builds. Live-service checks are explicitly opt-in and separate.
 
-Full-document/PDF extraction, scheduled refresh, translation service integration, additional government/forum sources, and signed installers are future work. Current adapters retrieve API records and onion search-index snippets; they do not crawl arbitrary result pages. Future crawlers must enforce robots policies and bound document parsing resources.
+Version 0.4 completes the Coverage milestone. Claim/entity intelligence is planned for 0.5; full-document/PDF extraction, timelines, refresh diffs and large-scale persistence are planned for 0.6. Translation integration, additional government/forum sources and signed installers remain deferred. Current adapters retrieve API records and onion search-index snippets; they do not crawl arbitrary result pages. Future crawlers must enforce robots policies and bound document parsing resources.
 
 License: [AGPL-3.0](LICENSE).

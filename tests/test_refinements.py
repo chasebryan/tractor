@@ -101,7 +101,7 @@ def test_version_one_database_migrates_and_backfills_history(tmp_path, investiga
         loaded = database.load(investigation.id)
         assert loaded.results[0].title == investigation.results[0].title
         assert loaded.pending_tasks == []
-        assert database.connection.execute("PRAGMA user_version").fetchone()[0] == 2
+        assert database.connection.execute("PRAGMA user_version").fetchone()[0] == len(MIGRATIONS)
 
 
 def test_atomic_export_failure_leaves_original_file(tmp_path):

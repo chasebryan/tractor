@@ -11,14 +11,18 @@ from dataclasses import asdict
 from tractor.analysis.relationships import correlate
 from tractor.core.convergence import Budget
 from tractor.core.deduplication import DuplicateIndex, normalize_result
-from tractor.core.models import Attempt, Edge, Investigation, QueryVariant, RetrievalTask
+from tractor.core.diversity import observation
+from tractor.core.models import Attempt, Edge, Investigation, QueryVariant, RetrievalTask, now
 from tractor.core.provenance import record_discovery
 from tractor.core.query import add_variant, build_plan
 from tractor.core.scoring import rank_results
+from tractor.credentials import redact
 from tractor.language.detect import detect_language
 from tractor.network.client import NetworkContext, SourceUnavailable
 from tractor.sources.base import SearchBatch, SearchContext, SourceAdapter
+from tractor.sources.capabilities import capabilities
 from tractor.storage.database import Database
+from tractor.storage.health import provider_health, record_health, scheduling_score
 
 logger = logging.getLogger("tractor.investigation")
 EventHandler = Callable[[str, object], None]
@@ -36,6 +40,9 @@ class InvestigationEngine:
         on_event: EventHandler | None = None,
         cancelled: threading.Event | None = None,
         network_contexts: dict[str, NetworkContext] | None = None,
+        provider_configuration: dict | None = None,
+        search_options: dict | None = None,
+        profile: str = "Custom",
     ):
         if not adapters or len({a.id for a in adapters}) != len(adapters):
             raise ValueError("Enable at least one source, with unique source IDs.")
@@ -47,6 +54,10 @@ class InvestigationEngine:
         self.on_event = on_event or (lambda *_: None)
         self.cancelled = cancelled or threading.Event()
         self._duplicates = DuplicateIndex()
+        self.provider_configuration = provider_configuration or {}
+        self.search_options = search_options or {}
+        self.profile = profile
+        self.health = provider_health(database.connection)
 
     async def _search(
         self, task: RetrievalTask, query: QueryVariant, inv: Investigation
@@ -62,9 +73,14 @@ class InvestigationEngine:
             cursor=task.cursor,
             run_number=inv.runs,
             network=getattr(self.adapters[task.provider], "network", "clearnet"),
+            scheduling_score=scheduling_score(self.health.get(task.provider, {})),
         )
         context = SearchContext(
-            self.client, self.budget.max_results_per_query, cursor=task.cursor, page=task.page
+            self.client,
+            self.budget.max_results_per_query,
+            cursor=task.cursor,
+            page=task.page,
+            requested_language=self.search_options.get("language", "auto"),
         )
         inv.attempts.append(attempt)
         attempt.status = "running"
@@ -73,11 +89,39 @@ class InvestigationEngine:
             "activity", {"provider": task.provider, "page": task.page, "pass": task.pass_number}
         )
         try:
+            adapter = self.adapters[task.provider]
+            if query.source == "quoted_phrase" and not capabilities(adapter).quoted_queries:
+                attempt.status = "skipped"
+                attempt.warnings = ["This provider does not expose an exact-phrase query contract."]
+                return attempt, SearchBatch(skipped_reason=attempt.warnings[0])
+            if hasattr(adapter, "routing_notes"):
+                attempt.warnings = adapter.routing_notes(query)
+            else:
+                caps = capabilities(adapter)
+                for option, attribute, defaults in (
+                    ("language", "languages", {"auto", "all"}),
+                    ("region", "regions", {""}),
+                    ("freshness", "freshness", {"any"}),
+                ):
+                    value = self.search_options.get(option)
+                    if value is not None and value not in defaults and not getattr(caps, attribute):
+                        attempt.warnings.append(
+                            f"{task.provider}: {option} control unsupported; original query used."
+                        )
             if attempt.network not in self.network_contexts:
                 raise SourceUnavailable("This source requires a configured Tor network connection.")
             context.client = self.network_contexts[attempt.network]
             batch = await self.adapters[task.provider].search(query, context)
-            attempt.status = "success"
+            attempt.status = (
+                "skipped" if batch.skipped_reason else "partial" if batch.partial else "success"
+            )
+            attempt.warnings = redact(
+                attempt.warnings
+                + batch.warnings
+                + ([batch.skipped_reason] if batch.skipped_reason else [])
+            )
+            if batch.partial:
+                attempt.error_category = "upstream_partial"
             attempt.result_count = len(batch.results)
             attempt.truncated = batch.truncated
             if batch.results:
@@ -90,13 +134,22 @@ class InvestigationEngine:
             raise
         except Exception as exc:
             attempt.status = "error"
-            attempt.error = str(exc) if isinstance(exc, SourceUnavailable) else type(exc).__name__
+            attempt.error = (
+                redact(str(exc)) if isinstance(exc, SourceUnavailable) else type(exc).__name__
+            )
+            attempt.error_category = (
+                exc.category if isinstance(exc, SourceUnavailable) else "contract"
+            )
             return attempt, SearchBatch()
         finally:
             attempt.language = context.search_language or query.language
             attempt.duration_ms = int((time.monotonic() - started) * 1000)
             attempt.cached_requests = context.stats.cached
             attempt.network_requests = context.stats.network
+            attempt.rate_limit_events = context.stats.rate_limits
+            if attempt.error_category == "rate_limited" and not attempt.rate_limit_events:
+                attempt.rate_limit_events = 1
+            attempt.finished_at = now()
             logger.info(
                 "source_attempt",
                 extra={
@@ -105,7 +158,7 @@ class InvestigationEngine:
                     "query_variant": query.id,
                     "duration_ms": attempt.duration_ms,
                     "result_count": attempt.result_count,
-                    "error_category": attempt.error,
+                    "error_category": attempt.error_category,
                     "status": attempt.status,
                 },
             )
@@ -125,6 +178,7 @@ class InvestigationEngine:
                 continue
             accepted_ids.add(result.id)
             record_discovery(inv, query, result)
+            result.metadata["discovery_observations"] = [observation(result)]
             if result.original_language == "und":
                 result.original_language = detect_language(result.original_text)
                 result.metadata["language_basis"] = "automatic estimate"
@@ -146,6 +200,12 @@ class InvestigationEngine:
                 original.matched_queries = list(
                     dict.fromkeys(original.matched_queries + result.matched_queries)
                 )
+                original.metadata.setdefault(
+                    "discovery_observations", [observation(original)]
+                ).append(observation(result))
+                attempt.duplicate_yield += 1
+            else:
+                attempt.unique_yield += 1
             inv.results.append(result)
             self._duplicates.add(result)
             correlate(inv, result)
@@ -173,6 +233,7 @@ class InvestigationEngine:
         return new_variants
 
     def _checkpoint(self, inv: Investigation) -> None:
+        inv.provider_health = provider_health(self.database.connection)
         self.database.save(inv)
         self.on_event("snapshot", inv.to_dict())
 
@@ -199,14 +260,19 @@ class InvestigationEngine:
         if attempt.status == "error":
             # HTTP retries have already been exhausted. Stop spending this run on this provider.
             blocked.add(task.provider)
+            record_health(self.database.connection, inv.id, attempt)
             return
+        partial = attempt.status == "partial"
+        if partial:
+            blocked.add(task.provider)
         if len(inv.results) + len(batch.results) > self.budget.max_results:
             inv.limits.append("The record budget interrupted a page; its cursor is retained.")
-        else:
+        elif not partial:
             inv.pending_tasks = [t for t in inv.pending_tasks if t.id != task.id]
         before = len(inv.unique_results)
         query = next(v for v in inv.plan.variants if v.id == task.query_id)
         variants = self._accept(inv, query, batch, attempt)
+        record_health(self.database.connection, inv.id, attempt)
         while len(inv.pass_yields) < task.pass_number:
             inv.pass_yields.append(0)
         inv.pass_yields[task.pass_number - 1] += len(inv.unique_results) - before
@@ -225,7 +291,11 @@ class InvestigationEngine:
             and a.cursor != attempt.cursor
             for a in inv.attempts
         )
-        if repeated_page:
+        if partial:
+            # Warnings live on the attempt; the pending cursor communicates retryable work.
+            # Do not leave an unresolved global limit after a later successful retry.
+            pass
+        elif repeated_page:
             inv.limits.append(f"{task.provider}: pagination returned a repeated page; stopped.")
         elif batch.next_cursor and len(batch.next_cursor) <= 8192:
             seen_cursor = any(
@@ -239,7 +309,7 @@ class InvestigationEngine:
                 inv.limits.append(
                     f"{task.provider}: pagination returned a previous cursor; stopped."
                 )
-            elif batch.results:
+            else:
                 self._enqueue(
                     inv,
                     RetrievalTask(
@@ -287,6 +357,9 @@ class InvestigationEngine:
                     key: getattr(a, "identity", key) for key, a in self.adapters.items()
                 },
                 previous_investigation=previous_id,
+                provider_configuration=self.provider_configuration,
+                search_options=self.search_options,
+                profile=self.profile,
             )
             for variant in plan.variants:
                 inv.edges.append(
@@ -319,7 +392,16 @@ class InvestigationEngine:
                     break
                 occupied = {t.provider for t in active.values()}
                 running_ids = {t.id for t in active.values()}
-                for task in sorted(inv.pending_tasks, key=lambda t: (t.pass_number, t.page)):
+                for task in sorted(
+                    inv.pending_tasks,
+                    key=lambda t: (
+                        t.pass_number,
+                        t.page,
+                        -scheduling_score(self.health.get(t.provider, {}))
+                        if t.pass_number > 1
+                        else 0,
+                    ),
+                ):
                     if len(active) >= self.budget.concurrency or scheduled >= self.budget.max_jobs:
                         break
                     pair = (task.provider, task.query_id)
@@ -383,7 +465,9 @@ class InvestigationEngine:
             if active:
                 await asyncio.gather(*active, return_exceptions=True)
             if inv.status == "running":
-                successful = any(a.status == "success" for a in inv.attempts)
+                successful = any(
+                    a.status in {"success", "partial", "skipped"} for a in inv.attempts
+                )
                 inv.status = (
                     "failed"
                     if not successful

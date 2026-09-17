@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 import hashlib
 import json
+import time
 from dataclasses import dataclass, field
 from typing import Any, Protocol
 from urllib.parse import urljoin, urlsplit
@@ -10,10 +11,11 @@ from urllib.parse import urljoin, urlsplit
 import httpx
 
 from tractor.core.deduplication import normalize_url
+from tractor.credentials import RequestAuth, redact, redact_bytes
 from tractor.network.throttling import RateLimiter
 from tractor.storage.cache import ResponseCache
 
-USER_AGENT = "TRACTOR/0.3 (+https://github.com/chasebryan/tractor; public research)"
+USER_AGENT = "TRACTOR/0.4 (+https://github.com/chasebryan/tractor; public research)"
 API_HOSTS = frozenset(
     {
         "api.github.com",
@@ -22,6 +24,11 @@ API_HOSTS = frozenset(
         "www.wikidata.org",
         "www.ebi.ac.uk",
         "api.gdeltproject.org",
+        "api.search.brave.com",
+        "www.mojeek.com",
+        "kagi.com",
+        "api2.marginalia-search.com",
+        "index.commoncrawl.org",
     }
 )
 
@@ -31,11 +38,13 @@ class NetworkPolicyError(ValueError):
 
 
 class SourceUnavailable(RuntimeError):
-    """A provider could not be queried; messages never contain request bodies or secrets."""
-
-    def __init__(self, message: str, *, status_code: int | None = None):
-        super().__init__(message)
+    def __init__(
+        self, message: str, *, status_code: int | None = None, category: str = "unavailable"
+    ):
+        super().__init__(redact(message))
         self.status_code = status_code
+        self.category = category
+        self.details: dict = {}
 
 
 @dataclass
@@ -43,18 +52,14 @@ class RequestStats:
     network: int = 0
     cached: int = 0
     redirects: list[str] = field(default_factory=list)
+    rate_limits: int = 0
 
 
 class NetworkContext(Protocol):
     tor: bool
 
-    async def get_json(
-        self, url: str, params=None, *, interval=1.0, ttl=3600, stats=None
-    ) -> Any: ...
-
-    async def get_text(
-        self, url: str, params=None, *, interval=2.0, ttl=900, stats=None
-    ) -> str: ...
+    async def get_json(self, url: str, params=None, **kwargs) -> Any: ...
+    async def get_text(self, url: str, params=None, **kwargs) -> str: ...
 
 
 class NetworkClient:
@@ -69,13 +74,14 @@ class NetworkClient:
         tor: bool = False,
         timeout: httpx.Timeout | None = None,
     ):
-        self.cache = cache
-        self.allowed_hosts = allowed_hosts
-        self.allowed_origins = allowed_origins
+        self.cache, self.allowed_hosts, self.allowed_origins = cache, allowed_hosts, allowed_origins
         self.tor = tor
         if tor and (not proxy or not proxy.startswith("socks5h://")):
             raise NetworkPolicyError("Tor requires an explicit socks5h proxy with remote DNS.")
         self.limiter = RateLimiter()
+        # Authenticated responses never enter the persistent HTTP cache. This small, per-run
+        # cache avoids paying again when a large provider page is consumed in local chunks.
+        self._private_cache: dict[str, tuple[float, bytes, dict[str, str]]] = {}
         self.http = httpx.AsyncClient(
             timeout=timeout or httpx.Timeout(15, connect=8),
             follow_redirects=False,
@@ -94,8 +100,7 @@ class NetworkClient:
         normalized = normalize_url(url)
         parts = urlsplit(normalized)
         host = parts.hostname or ""
-        onion = host.endswith(".onion")
-        if self.tor != onion:
+        if self.tor != host.endswith(".onion"):
             raise NetworkPolicyError("Onion and clearnet requests require separate clients.")
         if not self.tor and f"{parts.scheme}://{parts.netloc}" in self.allowed_origins:
             return normalized
@@ -110,39 +115,60 @@ class NetworkClient:
     async def get_json(
         self,
         url: str,
-        params: dict[str, Any] | None = None,
+        params=None,
         *,
-        interval: float = 1.0,
-        ttl: float = 3600,
-        stats: RequestStats | None = None,
+        interval=1.0,
+        ttl=3600,
+        stats=None,
+        auth: RequestAuth | None = None,
+        body=None,
+        provider="",
     ) -> Any:
-        body, _ = await self._get(
+        raw, _ = await self._get(
             url,
             params,
             interval=interval,
             ttl=ttl,
             stats=stats,
             kind="json",
-            accepted={"application/json", "text/json"},
+            accepted={"application/json", "text/json"}
+            | ({"text/x-cdxj"} if urlsplit(url).hostname == "index.commoncrawl.org" else set()),
+            max_bytes=4 * 1024 * 1024,
+            auth=auth,
+            body=body,
+            provider=provider,
+        )
+        try:
+            return redact(json.loads(raw))
+        except (json.JSONDecodeError, UnicodeError):
+            raise SourceUnavailable("Invalid JSON response", category="contract") from None
+
+    async def get_ndjson(self, url: str, params=None, *, interval=2.0, ttl=3600, stats=None):
+        # Only the registered index API exposes this path; this does not enable page retrieval.
+        if self.tor or urlsplit(url).hostname != "index.commoncrawl.org":
+            raise NetworkPolicyError("NDJSON is restricted to the Common Crawl index API.")
+        raw, _ = await self._get(
+            url,
+            params,
+            interval=interval,
+            ttl=ttl,
+            stats=stats,
+            kind="ndjson",
+            accepted={"application/json", "application/x-ndjson", "text/x-ndjson", "text/x-cdxj"},
             max_bytes=4 * 1024 * 1024,
         )
         try:
-            return json.loads(body)
-        except (json.JSONDecodeError, UnicodeError):
-            raise SourceUnavailable("Invalid JSON response") from None
+            rows = [json.loads(line) for line in raw.splitlines() if line.strip()]
+        except (ValueError, UnicodeError):
+            raise SourceUnavailable("Invalid index response", category="contract") from None
+        if any(not isinstance(row, dict) for row in rows):
+            raise SourceUnavailable("Invalid index records", category="contract")
+        return redact(rows)
 
-    async def get_text(
-        self,
-        url: str,
-        params: dict[str, Any] | None = None,
-        *,
-        interval: float = 2.0,
-        ttl: float = 900,
-        stats: RequestStats | None = None,
-    ) -> str:
+    async def get_text(self, url: str, params=None, *, interval=2.0, ttl=900, stats=None) -> str:
         if not self.tor:
             raise NetworkPolicyError("HTML retrieval requires an explicit Tor source context.")
-        body, headers = await self._get(
+        raw, headers = await self._get(
             url,
             params,
             interval=interval,
@@ -152,31 +178,89 @@ class NetworkClient:
             accepted={"text/html", "text/plain", "application/xhtml+xml"},
             max_bytes=2 * 1024 * 1024,
         )
-        response = httpx.Response(
-            200, content=body, headers={"content-type": headers.get("content-type", "text/plain")}
+        return redact(
+            httpx.Response(
+                200,
+                content=raw,
+                headers={"content-type": headers.get("content-type", "text/plain")},
+            ).text
         )
-        return response.text
 
     async def _get(
         self,
-        url: str,
-        params: dict[str, Any] | None,
+        url,
+        params,
         *,
-        interval: float,
-        ttl: float,
-        stats: RequestStats | None,
-        kind: str,
-        accepted: set[str],
-        max_bytes: int,
-    ) -> tuple[bytes, dict[str, str]]:
+        interval,
+        ttl,
+        stats,
+        kind,
+        accepted,
+        max_bytes,
+        auth=None,
+        body=None,
+        provider="",
+    ):
         stats = stats if stats is not None else RequestStats()
-        url = self.validate(str(httpx.URL(url, params=params)))
-        key = hashlib.sha256(f"{'tor' if self.tor else 'clear'}:{kind}:{url}".encode()).hexdigest()
-        cached = self.cache.get(key) if self.cache else None
-        if cached:
-            stats.cached += 1
-            return cached.body, cached.headers
-        current = url
+        params = dict(params or {})
+        url = self.validate(url)
+        origin = "{0.scheme}://{0.netloc}".format(urlsplit(url))
+        headers = {"Accept": ", ".join(sorted(accepted))}
+        private_scope = ""
+        if auth:
+            if self.tor or origin != auth.origin or urlsplit(url).scheme != "https":
+                raise NetworkPolicyError(
+                    "Credentials are restricted to the provider's HTTPS origin."
+                )
+            secret = auth.credential.value
+            private_scope = hashlib.sha256(secret.encode()).hexdigest()
+            if auth.query_parameter:
+                params[auth.query_parameter] = secret
+            else:
+                headers[auth.header] = auth.prefix + secret
+        current = self.validate(str(httpx.URL(url, params=params or None)))
+        key = hashlib.sha256(
+            json.dumps(
+                ["tor" if self.tor else "clear", provider, kind, current, body, private_scope],
+                sort_keys=True,
+            ).encode()
+        ).hexdigest()
+        if ttl > 0:
+            if auth:
+                cached = self._private_cache.get(key)
+                if cached and cached[0] > time.monotonic():
+                    stats.cached += 1
+                    return cached[1], cached[2]
+            else:
+                cached = self.cache.get(key) if self.cache else None
+                if cached:
+                    stats.cached += 1
+                    return cached.body, cached.headers
+        # Total timeout includes connection, body, retries and throttling; the engine also
+        # bounds an investigation. Slow Tor has its own outer deadline.
+        try:
+            async with asyncio.timeout(75 if self.tor else 60):
+                return await self._request(
+                    current,
+                    headers,
+                    body,
+                    auth,
+                    key,
+                    kind,
+                    accepted,
+                    max_bytes,
+                    interval,
+                    ttl,
+                    stats,
+                )
+        except TimeoutError:
+            raise SourceUnavailable(
+                "Source request deadline exceeded", category="timeout"
+            ) from None
+
+    async def _request(
+        self, current, headers, body, auth, key, kind, accepted, max_bytes, interval, ttl, stats
+    ):
         for _redirect in range(5):
             self.validate(current)
             for attempt in range(3):
@@ -184,58 +268,135 @@ class NetworkClient:
                 try:
                     stats.network += 1
                     async with self.http.stream(
-                        "GET", current, headers={"Accept": ", ".join(sorted(accepted))}
+                        "POST" if body is not None else "GET", current, headers=headers, json=body
                     ) as response:
                         if response.status_code in {301, 302, 303, 307, 308}:
                             location = response.headers.get("location")
                             if not location:
-                                raise SourceUnavailable("Redirect without a destination")
-                            current = self.validate(urljoin(current, location))
-                            stats.redirects.append(current)
+                                raise SourceUnavailable(
+                                    "Redirect without a destination", category="contract"
+                                )
+                            target = self.validate(urljoin(current, location))
+                            if auth:
+                                raise NetworkPolicyError(
+                                    "Authenticated API redirects are disabled."
+                                )
+                            current = target
+                            stats.redirects.append(redact(current))
                             break
+                        if response.status_code == 429:
+                            stats.rate_limits += 1
                         if response.status_code in {429, 500, 502, 503, 504} and attempt < 2:
                             retry = response.headers.get("retry-after", "")
                             delay = float(retry) if retry.isdigit() else 2**attempt
                             if delay > 20:
-                                raise SourceUnavailable("Provider requested a longer cooldown")
+                                raise SourceUnavailable(
+                                    "Provider requested a longer cooldown",
+                                    status_code=response.status_code,
+                                    category="rate_limited",
+                                )
                             await asyncio.sleep(max(delay, 2**attempt))
                             continue
+                        error_details = {}
+                        if response.status_code >= 400:
+                            error_body = b""
+                            async for chunk in response.aiter_bytes():
+                                error_body += chunk[: max(0, 4096 - len(error_body))]
+                                if len(error_body) >= 4096:
+                                    break
+                            try:
+                                candidate = json.loads(error_body)
+                                error_details = (
+                                    redact(candidate) if isinstance(candidate, dict) else {}
+                                )
+                            except (ValueError, UnicodeError):
+                                pass
                         response.raise_for_status()
-                        content_type = response.headers.get("content-type", "").split(";")[0]
-                        if content_type.lower().strip() not in accepted:
-                            raise SourceUnavailable("Provider returned an unsupported content type")
-                        chunks: list[bytes] = []
-                        size = 0
+                        content_type = (
+                            response.headers.get("content-type", "").split(";")[0].lower().strip()
+                        )
+                        if content_type not in accepted:
+                            raise SourceUnavailable(
+                                "Provider returned an unsupported content type", category="contract"
+                            )
+                        chunks, size = [], 0
                         async for chunk in response.aiter_bytes():
                             size += len(chunk)
                             if size > max_bytes:
-                                raise SourceUnavailable("Response exceeded the source size limit")
+                                raise SourceUnavailable(
+                                    "Response exceeded the source size limit", category="size_limit"
+                                )
                             chunks.append(chunk)
-                        body = b"".join(chunks)
+                        raw = b"".join(chunks)
                         if kind == "json":
-                            json.loads(body)
-                        if self.cache:
-                            self.cache.put(key, body, dict(response.headers), ttl)
-                        return body, dict(response.headers)
+                            # Remove credential echoes before caching or parsing.
+                            raw = json.dumps(redact(json.loads(raw)), ensure_ascii=False).encode()
+                        elif kind == "ndjson":
+                            raw = b"\n".join(
+                                json.dumps(redact(json.loads(line)), ensure_ascii=False).encode()
+                                for line in raw.splitlines()
+                                if line.strip()
+                            )
+                        else:
+                            raw = redact_bytes(raw)
+                        safe_headers = {
+                            "content-type": response.headers.get("content-type", ""),
+                            "cache-control": response.headers.get("cache-control", ""),
+                        }
+                        safe_headers = redact(safe_headers)
+                        if auth:
+                            control = safe_headers["cache-control"].lower()
+                            if ttl > 0 and not any(v in control for v in ("no-store", "no-cache")):
+                                if len(self._private_cache) >= 32:
+                                    self._private_cache.pop(next(iter(self._private_cache)))
+                                self._private_cache[key] = (
+                                    time.monotonic() + min(ttl, 900, self._max_age(control)),
+                                    raw,
+                                    safe_headers,
+                                )
+                        elif self.cache:
+                            self.cache.put(key, raw, safe_headers, ttl)
+                        return raw, safe_headers
                 except (httpx.TimeoutException, httpx.NetworkError, httpx.ProxyError) as exc:
                     if attempt == 2:
-                        raise SourceUnavailable(type(exc).__name__) from None
+                        category = (
+                            "timeout" if isinstance(exc, httpx.TimeoutException) else "network"
+                        )
+                        raise SourceUnavailable(type(exc).__name__, category=category) from None
                     await asyncio.sleep(2**attempt)
                 except httpx.HTTPStatusError as exc:
-                    raise SourceUnavailable(
-                        f"HTTP {exc.response.status_code}", status_code=exc.response.status_code
-                    ) from None
+                    code = exc.response.status_code
+                    category = (
+                        "credential"
+                        if code in {401, 403}
+                        else "rate_limited"
+                        if code == 429
+                        else "unavailable"
+                    )
+                    failure = SourceUnavailable(f"HTTP {code}", status_code=code, category=category)
+                    failure.details = error_details
+                    raise failure from None
                 except (json.JSONDecodeError, UnicodeError, httpx.DecodingError):
-                    raise SourceUnavailable("Invalid JSON response") from None
+                    raise SourceUnavailable(
+                        "Invalid provider response", category="contract"
+                    ) from None
             else:
                 raise SourceUnavailable("Request retry limit reached")
-        raise SourceUnavailable("Redirect limit reached")
+        raise SourceUnavailable("Redirect limit reached", category="redirect")
 
-    async def close(self) -> None:
+    @staticmethod
+    def _max_age(control):
+        import re
+
+        match = re.search(r'(?:^|,)\s*max-age\s*=\s*"?(\d+)', control)
+        return int(match[1]) if match else 900
+
+    async def close(self):
+        self._private_cache.clear()
         await self.http.aclose()
 
-    async def __aenter__(self) -> NetworkClient:
+    async def __aenter__(self):
         return self
 
-    async def __aexit__(self, *args: object) -> None:
+    async def __aexit__(self, *_):
         await self.close()

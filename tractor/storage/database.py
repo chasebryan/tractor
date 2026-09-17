@@ -7,6 +7,7 @@ from dataclasses import asdict
 from pathlib import Path
 
 from tractor.core.models import Investigation, now
+from tractor.credentials import redact
 from tractor.storage.migrations import migrate
 
 
@@ -31,7 +32,7 @@ class Database:
                 status=excluded.status, snapshot=excluded.snapshot""",
                 (
                     inv.id,
-                    inv.query,
+                    redact(inv.query),
                     inv.created_at,
                     inv.updated_at,
                     inv.status,
@@ -50,7 +51,7 @@ class Database:
                     inv.id,
                     kind,
                     getattr(item, "id", str(index)),
-                    json.dumps(asdict(item), ensure_ascii=False),
+                    json.dumps(redact(asdict(item)), ensure_ascii=False),
                 )
                 for kind, items in groups.items()
                 for index, item in enumerate(items)
@@ -65,9 +66,11 @@ class Database:
                 "INSERT INTO investigation_search VALUES (?, ?)",
                 (
                     inv.id,
-                    inv.query
-                    + "\n"
-                    + "\n".join(r.title + " " + r.original_text[:12000] for r in inv.results),
+                    redact(
+                        inv.query
+                        + "\n"
+                        + "\n".join(r.title + " " + r.original_text[:12000] for r in inv.results)
+                    ),
                 ),
             )
 

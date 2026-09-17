@@ -3,7 +3,6 @@ from pathlib import Path
 from PySide6.QtCore import Qt, QTimer, Slot
 from PySide6.QtGui import QIcon, QKeySequence, QShortcut
 from PySide6.QtWidgets import (
-    QCheckBox,
     QDialog,
     QDialogButtonBox,
     QFileDialog,
@@ -14,7 +13,6 @@ from PySide6.QtWidgets import (
     QMainWindow,
     QMessageBox,
     QPushButton,
-    QScrollArea,
     QStackedWidget,
     QVBoxLayout,
     QWidget,
@@ -25,10 +23,7 @@ from tractor.core.query import normalize_query
 from tractor.export.csv_export import export_csv
 from tractor.export.json_export import export_json
 from tractor.export.report import export_markdown
-from tractor.network.tor import validate_proxy
-from tractor.settings import Settings, validate_onion_endpoint, validate_web_endpoint
-from tractor.sources import default_adapters
-from tractor.sources.onion import TorchSearch
+from tractor.settings import Settings
 from tractor.storage.database import Database
 from tractor.ui.investigation_view import InvestigationView
 from tractor.ui.results_view import ResultsView
@@ -143,6 +138,7 @@ class MainWindow(QMainWindow):
             onion_endpoint=self.settings.onion_endpoint,
             resume_id=resume_id,
             previous_id=previous_id,
+            settings=self.settings,
         )
         self.worker.event.connect(self.on_event)
         self.worker.failed.connect(self.show_failure)
@@ -304,140 +300,12 @@ class MainWindow(QMainWindow):
         dialog.exec()
 
     def show_settings(self) -> None:
-        dialog = QDialog(self)
-        dialog.setWindowTitle("TRACTOR · Settings")
-        dialog.resize(720, 730)
-        outer = QVBoxLayout(dialog)
-        scroll = QScrollArea()
-        scroll.setWidgetResizable(True)
-        content = QWidget()
-        layout = QVBoxLayout(content)
-        layout.setContentsMargins(25, 25, 25, 25)
-        layout.addWidget(label("Public data sources", "heading"))
-        layout.addWidget(
-            label(
-                "Enabled providers receive your query and discovered search variants. "
-                "They may log requests under their own policies. All investigations "
-                "use the same bounded, iterative search pipeline.",
-                "muted",
-                True,
-            )
-        )
-        checks: dict[str, QCheckBox] = {}
-        for adapter in [*default_adapters(), TorchSearch()]:
-            check = QCheckBox(adapter.name)
-            check.setChecked(adapter.id in self.enabled_sources)
-            layout.addWidget(check)
-            layout.addWidget(label(adapter.description, "muted", True))
-            checks[adapter.id] = check
-        web = QCheckBox("SearxNG · General web search")
-        web.setChecked("searxng" in self.enabled_sources)
-        checks["searxng"] = web
-        layout.addWidget(web)
-        endpoint = QLineEdit(self.settings.web_endpoint)
-        endpoint.setPlaceholderText("https://your-search-server.example")
-        endpoint.setAccessibleName("SearxNG server URL")
-        layout.addWidget(endpoint)
-        layout.addWidget(
-            label(
-                "Use a SearxNG server you operate or trust, with JSON search enabled. "
-                "Its upstream engines also receive searches. HTTP is supported for "
-                "a local server only.",
-                "muted",
-                True,
-            )
-        )
-        layout.addSpacing(15)
-        layout.addWidget(label("Tor connection", "heading"))
-        layout.addWidget(
-            label(
-                "Onion indexes use a separate Tor connection. Other enabled providers still "
-                "connect directly. Searches cover indexed public onion pages, not all of Tor.",
-                "muted",
-                True,
-            )
-        )
-        proxy = QLineEdit(self.settings.tor_proxy)
-        proxy.setPlaceholderText("Automatic · local Tor on port 9050 or Tor Browser on 9150")
-        proxy.setAccessibleName("Local Tor SOCKS proxy")
-        layout.addWidget(proxy)
-        autostart = QCheckBox("Start an installed Tor client automatically when needed")
-        autostart.setChecked(self.settings.tor_autostart)
-        layout.addWidget(autostart)
-        layout.addWidget(
-            label(
-                "Leave the proxy blank for automatic detection, or enter socks5h://127.0.0.1:9050. "
-                "Automatic startup requires the tor executable on your PATH. A client started "
-                "here stops when the search ends; an existing Tor connection stays running.",
-                "muted",
-                True,
-            )
-        )
-        onion_check = QCheckBox("SearxNG · Additional onion indexes")
-        onion_check.setChecked("onion_searxng" in self.enabled_sources)
-        checks["onion_searxng"] = onion_check
-        layout.addWidget(onion_check)
-        onion_endpoint = QLineEdit(self.settings.onion_endpoint)
-        onion_endpoint.setPlaceholderText("http://your-v3-onion-search-server.onion")
-        onion_endpoint.setAccessibleName("Onion SearxNG server URL")
-        layout.addWidget(onion_endpoint)
-        layout.addWidget(
-            label(
-                "Optional: your own onion-hosted SearxNG server with JSON responses and the "
-                "onions category enabled. Its upstream indexes also receive your query.",
-                "muted",
-                True,
-            )
-        )
-        layout.addSpacing(15)
-        layout.addWidget(label("Local storage: " + str(self.data_dir), "muted", True))
-        layout.addWidget(
-            label(
-                "No telemetry. No stored API credentials. Onion results are text previews; "
-                "open destination pages yourself in Tor Browser. Machine translation "
-                "requires an added backend.",
-                "muted",
-                True,
-            )
-        )
-        buttons = QDialogButtonBox(
-            QDialogButtonBox.StandardButton.Save | QDialogButtonBox.StandardButton.Cancel
-        )
+        from tractor.ui.settings_view import SettingsView
 
-        def save() -> None:
-            selected = [key for key, check in checks.items() if check.isChecked()]
-            if not selected:
-                QMessageBox.information(dialog, "Enable a source", "Select at least one provider.")
-                return
-            try:
-                url = validate_web_endpoint(endpoint.text())
-                if "searxng" in selected and not url:
-                    raise ValueError("Enter a server URL to enable web search.")
-                onion_url = validate_onion_endpoint(onion_endpoint.text())
-                if "onion_searxng" in selected and not onion_url:
-                    raise ValueError("Enter your onion SearxNG server URL to enable it.")
-                settings = Settings(
-                    selected, url, validate_proxy(proxy.text()), autostart.isChecked(), onion_url
-                )
-                settings.save(self.data_dir)
-            except ValueError as exc:
-                QMessageBox.information(dialog, "Check connection settings", str(exc))
-                return
-            except OSError:
-                QMessageBox.warning(
-                    dialog, "Could not save", "The settings directory is not writable."
-                )
-                return
-            self.enabled_sources = selected
-            self.settings = settings
-            dialog.accept()
-
-        buttons.accepted.connect(save)
-        buttons.rejected.connect(dialog.reject)
-        scroll.setWidget(content)
-        outer.addWidget(scroll, 1)
-        outer.addWidget(buttons)
-        dialog.exec()
+        dialog = SettingsView(self.settings, self.data_dir, self.database.connection, self)
+        if dialog.exec() == QDialog.DialogCode.Accepted:
+            self.settings = dialog.settings
+            self.enabled_sources = self.settings.sources
 
     def export(self) -> None:
         if not self.inv:
