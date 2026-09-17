@@ -5,10 +5,9 @@ from pathlib import Path
 from PySide6.QtCore import QThread, Signal
 
 from tractor.core.engine import InvestigationEngine
-from tractor.network.client import NetworkClient
+from tractor.network.session import configured_adapters, network_session
 from tractor.settings import Settings
 from tractor.sources import default_adapters
-from tractor.sources.web import SearxNG
 from tractor.storage.cache import ResponseCache
 from tractor.storage.database import Database
 
@@ -25,6 +24,9 @@ class InvestigationWorker(QThread):
         parent=None,
         *,
         web_endpoint: str = "",
+        tor_proxy: str = "",
+        tor_autostart: bool = True,
+        onion_endpoint: str = "",
         resume_id: str | None = None,
         previous_id: str | None = None,
     ):
@@ -33,6 +35,9 @@ class InvestigationWorker(QThread):
         self.db_path = db_path
         self.enabled_sources = enabled_sources
         self.web_endpoint = web_endpoint
+        self.tor_proxy = tor_proxy
+        self.tor_autostart = tor_autostart
+        self.onion_endpoint = onion_endpoint
         self.resume_id = resume_id
         self.previous_id = previous_id
         self.cancelled = threading.Event()
@@ -51,20 +56,28 @@ class InvestigationWorker(QThread):
 
     async def investigate(self) -> None:
         with Database(self.db_path) as database:
-            settings = Settings(self.enabled_sources, self.web_endpoint)
-            adapters = default_adapters()
-            if self.web_endpoint:
-                adapters.append(SearxNG(self.web_endpoint))
-            async with NetworkClient(
+            settings = Settings(
+                self.enabled_sources,
+                self.web_endpoint,
+                self.tor_proxy,
+                self.tor_autostart,
+                self.onion_endpoint,
+            )
+            adapters = configured_adapters(settings, default_adapters(), self.enabled_sources)
+            async with network_session(
+                settings,
+                adapters,
+                self.db_path.parent,
                 None if self.previous_id else ResponseCache(database.connection),
-                allowed_origins=settings.allowed_origins,
-            ) as client:
+                on_status=lambda message: self.event.emit("tor_status", message),
+            ) as (client, contexts):
                 engine = InvestigationEngine(
                     [a for a in adapters if a.id in self.enabled_sources],
                     client,
                     database,
                     on_event=self.event.emit,
                     cancelled=self.cancelled,
+                    network_contexts=contexts,
                 )
                 await engine.run(
                     self.query,

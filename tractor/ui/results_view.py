@@ -43,6 +43,9 @@ class ResultsView(QWidget):
         layout.addWidget(self.search)
         self.status = label("Searching public sources…", "muted", True)
         layout.addWidget(self.status)
+        self.tor_status = label("", "muted", True)
+        self.tor_status.hide()
+        layout.addWidget(self.tor_status)
         status_row = QHBoxLayout()
         self.summary = label(
             "Collecting records. Results will appear as sources respond.", "muted", True
@@ -205,6 +208,16 @@ class ResultsView(QWidget):
         if self.inv and self.inv.id != inv.id:
             self.reset()
         self.inv = inv
+        tor_attempts = [a for a in inv.attempts if a.network == "tor"]
+        if inv.status != "running":
+            self.tor_status.setVisible(bool(tor_attempts))
+            successful = sum(a.status == "success" for a in tor_attempts)
+            latest = {a.provider: a for a in tor_attempts}
+            failed = [a for a in latest.values() if a.status == "error"]
+            self.tor_status.setText(
+                f"Tor · {inv.coverage['onion_results']} unique onion results · "
+                f"{successful} successful searches" + (f" · {failed[-1].error}" if failed else "")
+            )
         self.populate(self.types, {r.source_type for r in inv.results})
         self.populate(self.languages, {r.original_language for r in inv.results}, language_name)
         self.populate(

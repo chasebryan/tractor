@@ -16,7 +16,7 @@ from tractor.core.provenance import record_discovery
 from tractor.core.query import add_variant, build_plan
 from tractor.core.scoring import rank_results
 from tractor.language.detect import detect_language
-from tractor.network.client import NetworkClient, SourceUnavailable
+from tractor.network.client import NetworkContext, SourceUnavailable
 from tractor.sources.base import SearchBatch, SearchContext, SourceAdapter
 from tractor.storage.database import Database
 
@@ -30,16 +30,18 @@ class InvestigationEngine:
     def __init__(
         self,
         adapters: list[SourceAdapter],
-        client: NetworkClient,
+        client: NetworkContext,
         database: Database,
         budget: Budget | None = None,
         on_event: EventHandler | None = None,
         cancelled: threading.Event | None = None,
+        network_contexts: dict[str, NetworkContext] | None = None,
     ):
         if not adapters or len({a.id for a in adapters}) != len(adapters):
             raise ValueError("Enable at least one source, with unique source IDs.")
         self.adapters = {a.id: a for a in adapters}
         self.client = client
+        self.network_contexts = {"clearnet": client, **(network_contexts or {})}
         self.database = database
         self.budget = budget or Budget()
         self.on_event = on_event or (lambda *_: None)
@@ -59,6 +61,7 @@ class InvestigationEngine:
             page=task.page,
             cursor=task.cursor,
             run_number=inv.runs,
+            network=getattr(self.adapters[task.provider], "network", "clearnet"),
         )
         context = SearchContext(
             self.client, self.budget.max_results_per_query, cursor=task.cursor, page=task.page
@@ -70,6 +73,9 @@ class InvestigationEngine:
             "activity", {"provider": task.provider, "page": task.page, "pass": task.pass_number}
         )
         try:
+            if attempt.network not in self.network_contexts:
+                raise SourceUnavailable("This source requires a configured Tor network connection.")
+            context.client = self.network_contexts[attempt.network]
             batch = await self.adapters[task.provider].search(query, context)
             attempt.status = "success"
             attempt.result_count = len(batch.results)

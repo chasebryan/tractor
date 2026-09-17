@@ -25,8 +25,10 @@ from tractor.core.query import normalize_query
 from tractor.export.csv_export import export_csv
 from tractor.export.json_export import export_json
 from tractor.export.report import export_markdown
-from tractor.settings import Settings, validate_web_endpoint
+from tractor.network.tor import validate_proxy
+from tractor.settings import Settings, validate_onion_endpoint, validate_web_endpoint
 from tractor.sources import default_adapters
+from tractor.sources.onion import TorchSearch
 from tractor.storage.database import Database
 from tractor.ui.investigation_view import InvestigationView
 from tractor.ui.results_view import ResultsView
@@ -127,12 +129,18 @@ class MainWindow(QMainWindow):
         self.pages.setCurrentIndex(1)
         self.set_busy(True)
         self.results.status.setText("Preparing investigation…")
+        uses_tor = bool({"torch", "onion_searxng"} & set(self.enabled_sources))
+        self.results.tor_status.setVisible(uses_tor)
+        self.results.tor_status.setText("Tor · Waiting for onion sources…" if uses_tor else "")
         self.worker = InvestigationWorker(
             query,
             self.db_path,
             list(self.enabled_sources),
             self,
             web_endpoint=self.settings.web_endpoint,
+            tor_proxy=self.settings.tor_proxy,
+            tor_autostart=self.settings.tor_autostart,
+            onion_endpoint=self.settings.onion_endpoint,
             resume_id=resume_id,
             previous_id=previous_id,
         )
@@ -178,6 +186,9 @@ class MainWindow(QMainWindow):
         if kind == "snapshot":
             self.inv = Investigation.from_dict(payload)
             self.results.update_investigation(self.inv)
+        elif kind == "tor_status":
+            self.results.tor_status.setText(str(payload))
+            self.results.tor_status.show()
         elif kind == "status":
             if self.inv and self.inv.status != "running":
                 self.results.status.setText(f"{self.inv.status.title()} · {payload}")
@@ -313,7 +324,7 @@ class MainWindow(QMainWindow):
             )
         )
         checks: dict[str, QCheckBox] = {}
-        for adapter in default_adapters():
+        for adapter in [*default_adapters(), TorchSearch()]:
             check = QCheckBox(adapter.name)
             check.setChecked(adapter.id in self.enabled_sources)
             layout.addWidget(check)
@@ -337,11 +348,54 @@ class MainWindow(QMainWindow):
             )
         )
         layout.addSpacing(15)
+        layout.addWidget(label("Tor connection", "heading"))
+        layout.addWidget(
+            label(
+                "Onion indexes use a separate Tor connection. Other enabled providers still "
+                "connect directly. Searches cover indexed public onion pages, not all of Tor.",
+                "muted",
+                True,
+            )
+        )
+        proxy = QLineEdit(self.settings.tor_proxy)
+        proxy.setPlaceholderText("Automatic · local Tor on port 9050 or Tor Browser on 9150")
+        proxy.setAccessibleName("Local Tor SOCKS proxy")
+        layout.addWidget(proxy)
+        autostart = QCheckBox("Start an installed Tor client automatically when needed")
+        autostart.setChecked(self.settings.tor_autostart)
+        layout.addWidget(autostart)
+        layout.addWidget(
+            label(
+                "Leave the proxy blank for automatic detection, or enter socks5h://127.0.0.1:9050. "
+                "Automatic startup requires the tor executable on your PATH. A client started "
+                "here stops when the search ends; an existing Tor connection stays running.",
+                "muted",
+                True,
+            )
+        )
+        onion_check = QCheckBox("SearxNG · Additional onion indexes")
+        onion_check.setChecked("onion_searxng" in self.enabled_sources)
+        checks["onion_searxng"] = onion_check
+        layout.addWidget(onion_check)
+        onion_endpoint = QLineEdit(self.settings.onion_endpoint)
+        onion_endpoint.setPlaceholderText("http://your-v3-onion-search-server.onion")
+        onion_endpoint.setAccessibleName("Onion SearxNG server URL")
+        layout.addWidget(onion_endpoint)
+        layout.addWidget(
+            label(
+                "Optional: your own onion-hosted SearxNG server with JSON responses and the "
+                "onions category enabled. Its upstream indexes also receive your query.",
+                "muted",
+                True,
+            )
+        )
+        layout.addSpacing(15)
         layout.addWidget(label("Local storage: " + str(self.data_dir), "muted", True))
         layout.addWidget(
             label(
-                "No telemetry. No stored API credentials. Tor providers are not enabled "
-                "in this release. Machine translation requires an added backend.",
+                "No telemetry. No stored API credentials. Onion results are text previews; "
+                "open destination pages yourself in Tor Browser. Machine translation "
+                "requires an added backend.",
                 "muted",
                 True,
             )
@@ -359,10 +413,15 @@ class MainWindow(QMainWindow):
                 url = validate_web_endpoint(endpoint.text())
                 if "searxng" in selected and not url:
                     raise ValueError("Enter a server URL to enable web search.")
-                settings = Settings(selected, url)
+                onion_url = validate_onion_endpoint(onion_endpoint.text())
+                if "onion_searxng" in selected and not onion_url:
+                    raise ValueError("Enter your onion SearxNG server URL to enable it.")
+                settings = Settings(
+                    selected, url, validate_proxy(proxy.text()), autostart.isChecked(), onion_url
+                )
                 settings.save(self.data_dir)
             except ValueError as exc:
-                QMessageBox.information(dialog, "Check server URL", str(exc))
+                QMessageBox.information(dialog, "Check connection settings", str(exc))
                 return
             except OSError:
                 QMessageBox.warning(

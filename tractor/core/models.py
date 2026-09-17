@@ -125,6 +125,7 @@ class Attempt:
     run_number: int = 1
     rejected_count: int = 0
     page_fingerprint: str = ""
+    network: str = "clearnet"
 
 
 @dataclass
@@ -195,6 +196,14 @@ class Investigation:
             "pending_searches": len(self.pending_tasks),
             "invalid_records_skipped": sum(a.rejected_count for a in self.attempts),
             "runs": self.runs,
+            "onion_results": sum(r.source_type == SourceType.ONION for r in self.unique_results),
+            "tor_sources_attempted": len({a.provider for a in self.attempts if a.network == "tor"}),
+            "tor_sources_successful": len(
+                {a.provider for a in self.attempts if a.network == "tor" and a.status == "success"}
+            ),
+            "tor_network_requests": sum(
+                a.network_requests for a in self.attempts if a.network == "tor"
+            ),
         }
 
     def to_dict(self) -> dict[str, Any]:

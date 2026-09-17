@@ -55,7 +55,9 @@ class SearchView(QWidget):
         layout.addWidget(self.search)
         self.error = label("", "muted", True)
         layout.addWidget(self.error)
-        note = label("PUBLIC SOURCES   /   TRACEABLE EVIDENCE   /   LOCAL HISTORY", "eyebrow")
+        note = label(
+            "PUBLIC WEB + ONION INDEXES   /   TRACEABLE EVIDENCE   /   LOCAL HISTORY", "eyebrow"
+        )
         note.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(note)
         outer.addWidget(content, 0, Qt.AlignmentFlag.AlignHCenter)

@@ -1,6 +1,6 @@
 from urllib.parse import urlsplit
 
-from PySide6.QtCore import QLocale, QTimer, QUrl, Signal
+from PySide6.QtCore import QLocale, Qt, QTimer, QUrl, Signal
 from PySide6.QtGui import QDesktopServices
 from PySide6.QtWidgets import (
     QApplication,
@@ -23,6 +23,8 @@ PROVIDERS = {
     "wikidata": "Wikidata",
     "internet_archive": "Internet Archive",
     "searxng": "Web search",
+    "torch": "Torch · via Tor",
+    "onion_searxng": "Onion metasearch · via Tor",
 }
 
 
@@ -99,7 +101,10 @@ class ResultCard(QFrame):
             f"{language_name(result.original_language)}"
         )
         self.excerpt.setText(result.excerpt[:380] or "Metadata record. Open evidence for details.")
-        self.domain.setText(urlsplit(result.url).hostname or "")
+        domain = urlsplit(result.url).hostname or ""
+        self.domain.setText(
+            self.domain.fontMetrics().elidedText(domain, Qt.TextElideMode.ElideMiddle, 220)
+        )
         self.domain.setToolTip(result.url)
 
     def copy_link(self) -> None:

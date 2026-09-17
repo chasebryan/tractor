@@ -1,12 +1,9 @@
-from urllib.robotparser import RobotFileParser
+from protego import Protego
 
 
 def allows_crawl(robots_text: str, url: str, user_agent: str = "TRACTOR") -> bool:
-    """For future page adapters; current adapters use official metadata APIs only.
+    """The caller must retrieve the policy through the source's network context.
 
-    The caller must obtain robots.txt through its policy-controlled network context.
-    A retrieval failure should be treated as unavailable, never as blanket permission.
+    An unreachable policy must not be replaced with an empty, permissive policy.
     """
-    parser = RobotFileParser()
-    parser.parse(robots_text.splitlines())
-    return parser.can_fetch(user_agent, url)
+    return Protego.parse(robots_text).can_fetch(url, user_agent)

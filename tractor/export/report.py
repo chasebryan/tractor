@@ -74,7 +74,7 @@ def export_markdown(inv: Investigation, path: Path) -> None:
     lines += ["", "## Source attempts", ""]
     lines += [
         f"- Run {a.run_number} · Pass {a.pass_number} · Page {a.page} · "
-        f"{a.provider} · {escaped(a.query)}: {a.status}; "
+        f"{a.provider} · {a.network} · {escaped(a.query)}: {a.status}; "
         f"{a.result_count} records"
         + (f"; {escaped(a.error)}" if a.error else "")
         + ("; provider response limited" if a.truncated else "")

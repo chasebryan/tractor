@@ -7,10 +7,9 @@ from platformdirs import user_data_path
 from tractor.core.engine import InvestigationEngine
 from tractor.export.json_export import export_json
 from tractor.logging_config import configure_logging
-from tractor.network.client import NetworkClient
+from tractor.network.session import configured_adapters, network_session
 from tractor.settings import Settings
 from tractor.sources import default_adapters
-from tractor.sources.web import SearxNG
 from tractor.storage.cache import ResponseCache
 from tractor.storage.database import Database
 
@@ -22,24 +21,25 @@ async def headless(
     *,
     resume_id: str | None = None,
     sources: list[str] | None = None,
+    tor_proxy: str | None = None,
 ) -> int:
     settings = Settings.load(data_dir)
     selected = sources if sources is not None else settings.sources
-    adapters = default_adapters()
-    if settings.web_endpoint:
-        adapters.append(SearxNG(settings.web_endpoint))
-    if "searxng" in selected and not settings.web_endpoint:
-        raise ValueError(
-            "Configure a SearxNG server in desktop Settings before enabling web search."
-        )
+    if tor_proxy is not None:
+        from tractor.network.tor import validate_proxy
+
+        settings.tor_proxy = validate_proxy(tor_proxy)
+    adapters = configured_adapters(settings, default_adapters(), selected)
     with Database(data_dir / "investigations.sqlite3") as database:
         resume = database.load(resume_id) if resume_id else None
-        async with NetworkClient(
-            ResponseCache(database.connection), allowed_origins=settings.allowed_origins
-        ) as client:
-            engine = InvestigationEngine(
-                [a for a in adapters if a.id in selected], client, database
-            )
+        async with network_session(
+            settings,
+            adapters,
+            data_dir,
+            ResponseCache(database.connection),
+            on_status=lambda message: print(message, flush=True),
+        ) as (client, contexts):
+            engine = InvestigationEngine(adapters, client, database, network_contexts=contexts)
             inv = await engine.run(query, resume=resume)
             if output:
                 export_json(inv, output)
@@ -61,9 +61,10 @@ def main() -> int:
     parser.add_argument(
         "--sources",
         nargs="+",
-        choices=[a.id for a in default_adapters()] + ["searxng"],
+        choices=[a.id for a in default_adapters()] + ["searxng", "torch", "onion_searxng"],
         help="Override saved provider choices for this headless run",
     )
+    parser.add_argument("--tor-proxy", help="Local socks5h proxy override for a headless run")
     parser.add_argument("--export-json", type=Path, help="Export a headless investigation")
     args = parser.parse_args()
     configure_logging(args.debug)
@@ -76,6 +77,7 @@ def main() -> int:
                     args.export_json,
                     resume_id=args.resume,
                     sources=args.sources,
+                    tor_proxy=args.tor_proxy,
                 )
             )
         except KeyError:
@@ -86,8 +88,8 @@ def main() -> int:
             parser.exit(
                 130, "Stopped. Collected evidence and remaining work are saved in History.\n"
             )
-    if args.export_json or args.sources:
-        parser.error("--export-json and --sources require --search or --resume")
+    if args.export_json or args.sources or args.tor_proxy:
+        parser.error("--export-json, --sources and --tor-proxy require --search or --resume")
     if args.history is not None:
         with Database(args.data_dir / "investigations.sqlite3") as database:
             for item in database.history(search=args.history):

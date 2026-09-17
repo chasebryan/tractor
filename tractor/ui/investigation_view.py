@@ -46,12 +46,13 @@ class InvestigationView(QDialog):
         tabs.addTab(text_panel(coverage), "Coverage")
         attempts = QTreeWidget()
         attempts.setHeaderLabels(
-            ["Source / query", "Run / pass / page", "Status", "Records", "Details"]
+            ["Source / query", "Network", "Run / pass / page", "Status", "Records", "Details"]
         )
         for a in inv.attempts:
             item = QTreeWidgetItem(
                 [
                     f"{a.provider} · {a.query}",
+                    a.network.title(),
                     f"{a.run_number} / {a.pass_number} / {a.page}",
                     a.status,
                     str(a.result_count),
