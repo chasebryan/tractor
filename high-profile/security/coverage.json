@@ -1,0 +1,87 @@
+{
+  "completeness": "complete",
+  "deferred": [],
+  "documentType": "codex-security.coverage",
+  "excludePaths": [],
+  "explicitExclusions": [],
+  "includePaths": [
+    "server"
+  ],
+  "inventoryStrategy": "scoped_path",
+  "mode": "scoped_path",
+  "openQuestions": [
+    {
+      "question": "A future shared deployment must verify its actual gateway identity/CSRF policy, PostgreSQL TLS and role grants, and edge resource limits."
+    },
+    {
+      "question": "A future document acquisition or AI integration requires new network/parser/model boundary review."
+    }
+  ],
+  "scanId": "39c4956b-20fd-4cbe-9e55-ab2e615cfd70",
+  "schemaVersion": "1.0",
+  "surfaces": [
+    {
+      "disposition": "no_issue_found",
+      "id": "surface_authorization-shared-workspace-browser-origins-and-listener-exposure",
+      "label": "Authorization, shared workspace, browser origins and listener exposure",
+      "notes": "An unauthenticated client cannot publish or read/write the production investigation subtree: server/app.ts:121-146 uses a configured shared token, equal length validation and timingSafeEqual. Development listener is loopback-only at server/index.ts:7-12; Host allowlisting and mutation Origin enforcement are app.ts:75-105. No state-changing GET or supported CSRF/DNS-rebinding bypass found. This is one shared workspace, not a tenant boundary. TLS, per-user gateway identity, proxy Origin handling and edge rate limits are operator obligations, not implemented controls.",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "no_issue_found",
+      "id": "surface_sql-boundaries-search-and-privileged-migration-inputs",
+      "label": "SQL boundaries, search and privileged migration inputs",
+      "notes": "Attacker-controlled values remain bound parameters in server/search.ts:158-210 and server/ingestion.ts:146-307. Dynamic SQL fragments and seed names derive from application constants (seed.ts:19-26). Database migrations come from trusted module-relative SQL (db.ts:75-106), not HTTP paths. Runtime and migration use the same database authority; protection against database administrators is not claimed.",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "no_issue_found",
+      "id": "surface_untrusted-documents-discovery-urls-and-absent-execution-consumers",
+      "label": "Untrusted documents, discovery URLs and absent execution consumers",
+      "notes": "server/ingestion.ts:9-44 validates metadata and HTTPS URL forms; :126-195 stores literal document text and stops at REVIEW. TractorProvider (:71-87) invokes an injected discovery client but never fetches candidate URLs. No LLM, shell evaluation, redirect follower, arbitrary URL fetch or binary parser is wired in the runtime. Therefore no supported prompt-injection execution, SSRF, redirect or command-execution path exists here. Future fetching requires DNS/private-address checks on every redirect and response limits; syntactic URL checks alone are insufficient.",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "no_issue_found",
+      "id": "surface_filesystem-and-effective-configuration-paths",
+      "label": "Filesystem and effective configuration paths",
+      "notes": "LocalDocumentStore writes SHA-256-derived filenames and reads only lowercase 64-hex keys (ingestion.ts:89-106); its directory is trusted caller input and not wired to DATA_DIR. Embedded startup uses DATA_DIR or cwd/.data/postgres plus sibling .lock (index.ts:21-24; db.ts:45-73). audit-cli.ts:3 and seed-cli.ts:3 omit DATA_DIR: an established maintenance configuration bug, without an attacker-controlled HTTP path or privilege gain. The final implementation will correct and separately exercise these CLI entry points after this read-only snapshot audit.",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "no_issue_found",
+      "id": "surface_provenance-review-publication-and-append-only-history",
+      "label": "Provenance, review publication and append-only history",
+      "notes": "Manual ingestion creates REVIEW records and cannot publish by itself (ingestion.ts:146-188). Token-authorized publication inserts evidence and the new version transactionally, locking an existing claim identity and emitting audit/watch records (:230-312). Migration001:52-74 and migration002:1-18 protect immutable provenance, dates, synthetic separation and supersession under ordinary SQL operations. Privileged operators with DDL authority can alter database controls, which is outside the untrusted-document boundary.",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "no_issue_found",
+      "id": "surface_browser-text-links-and-cited-export-consumers",
+      "label": "Browser text, links and cited export consumers",
+      "notes": "API material is JSON and supporting React consumers use text expressions rather than unsafe HTML; server/app.ts:54-75 enables production CSP. Markdown export app.ts:453-492 strips angle brackets and escapes ordinary text, uses a UUID attachment filename, and is not rendered by an app Markdown engine. Stored citation URLs are interpolated as links; arbitrary downstream Markdown renderer behavior is outside this implementation. No concrete application XSS or sensitive-fetch sink was established.",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "no_issue_found",
+      "id": "surface_publication-visibility-auxiliary-queries-and-source-catalogue",
+      "label": "Publication visibility, auxiliary queries and source catalogue",
+      "notes": "Published claim filtering applies to search/detail/timeline and source-associated claims (search.ts:163-165; app.ts:267-369). Opposing contradiction and watch queries lack an independent published filter, but current writers only link published versions (ingestion.ts:282-307; seed.ts:689-696); no lower-privileged path to inconsistent records was found. Sources/snapshots are public metadata even at REVIEW (app.ts:306-345; ingestion.ts:146-188). DEPLOYMENT.md:30 now explicitly documents that behavior, correcting its earlier blanket published-only description. Confidential imports are outside the current public-source collection model.",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "no_issue_found",
+      "id": "surface_secret-recipients-logs-and-production-resource-assumptions",
+      "label": "Secret recipients, logs and production resource assumptions",
+      "notes": "REVIEW_TOKEN stays server-side, DATABASE_URL is consumed by the database adapter, DATA_DIR selects embedded state, and PUBLIC_ORIGIN contributes an allowed hostname (index.ts:21-33; app.ts:80-87,106-117,167-168; db.ts:17-23). Logs omit headers/bodies. Docker runs as node; Compose publishes only application host loopback and no database host port. Actual TLS, PostgreSQL grants, backups, gateway configuration and external object-storage permissions were not supplied or verified.",
+      "receiptRefs": []
+    },
+    {
+      "disposition": "no_issue_found",
+      "id": "surface_independent-baseline-server-authorization-provenance-and-untrusted-inputs",
+      "label": "Independent baseline: server authorization, provenance and untrusted inputs",
+      "notes": "Baseline fully reviewed the 11 scoped server files and found no reportable attacker-to-impact path. Host/origin and token checks: app.ts:75-146. Ingestion data and digest storage validation: ingestion.ts:9-106. Historical integrity: migrations/001_index.sql:52-74 and 002_integrity.sql:1-18. Parent architecture reconciliation remains.",
+      "receiptRefs": []
+    }
+  ]
+}

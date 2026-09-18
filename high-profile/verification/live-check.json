@@ -1,0 +1,157 @@
+{
+  "health": {
+    "status": "ok",
+    "product": "HIGH-PROFILE",
+    "release": "Index 1.0",
+    "collection": "DEVELOPMENT_REFERENCE_COLLECTION"
+  },
+  "integrity": {
+    "ok": true,
+    "checked_at": "2026-09-18T00:52:00.545Z",
+    "checks": [
+      {
+        "name": "orphaned_published_claims",
+        "ok": true,
+        "violations": []
+      },
+      {
+        "name": "invalid_temporal_chains",
+        "ok": true,
+        "violations": []
+      },
+      {
+        "name": "synthetic_contamination",
+        "ok": true,
+        "violations": []
+      },
+      {
+        "name": "alias_collisions",
+        "ok": true,
+        "violations": []
+      },
+      {
+        "name": "duplicate_entities",
+        "ok": true,
+        "violations": []
+      },
+      {
+        "name": "invalid_source_metadata",
+        "ok": true,
+        "violations": []
+      },
+      {
+        "name": "invalid_country_codes",
+        "ok": true,
+        "violations": []
+      },
+      {
+        "name": "failed_translations",
+        "ok": true,
+        "violations": []
+      },
+      {
+        "name": "duplicate_evidence",
+        "ok": true,
+        "violations": []
+      }
+    ],
+    "warnings": [
+      {
+        "id": "67512eef-3f8c-4a47-aadf-51c71c03494d",
+        "title": "SIPRI Yearbook 2025 \u00b7 World nuclear forces",
+        "health": "STALE"
+      },
+      {
+        "id": "a102fe6f-40cc-4a8f-a172-d192523c1be9",
+        "title": "SIPRI Yearbook 2024 \u00b7 World nuclear forces",
+        "health": "SUPERSEDED"
+      },
+      {
+        "id": "064c1cce-5afb-44ec-a995-7f53919959ad",
+        "title": "Synthetic memo A \u00b7 programme status",
+        "health": "UNKNOWN"
+      },
+      {
+        "id": "6a9c9fbc-7d90-4cf4-af36-107a0aea98da",
+        "title": "Synthetic memo B \u00b7 programme status",
+        "health": "UNKNOWN"
+      }
+    ]
+  },
+  "meta": {
+    "counts": {
+      "entities": 14,
+      "claims": 16,
+      "sources": 7,
+      "countries": 6,
+      "disagreements": 1
+    },
+    "countries": [
+      {
+        "code": "CN",
+        "name": "China",
+        "region": "East Asia"
+      },
+      {
+        "code": "FR",
+        "name": "France",
+        "region": "Europe"
+      },
+      {
+        "code": "RU",
+        "name": "Russia",
+        "region": "Europe / Northern Asia"
+      },
+      {
+        "code": "AE",
+        "name": "United Arab Emirates",
+        "region": "Western Asia"
+      },
+      {
+        "code": "GB",
+        "name": "United Kingdom",
+        "region": "Europe"
+      },
+      {
+        "code": "US",
+        "name": "United States",
+        "region": "North America"
+      }
+    ],
+    "publishers": [
+      {
+        "id": "350c506d-1a8d-4716-a789-c92d09eef3da",
+        "name": "ENEC",
+        "tier": 1
+      },
+      {
+        "id": "32f6a9b0-d8ba-4d52-aacd-319c5481e3fd",
+        "name": "Pr\u00e9sidence de la R\u00e9publique",
+        "tier": 1
+      },
+      {
+        "id": "cb3489b5-7f9e-4359-a773-cc11d1c02c53",
+        "name": "United Nations Treaty Collection",
+        "tier": 1
+      },
+      {
+        "id": "25b42571-08c8-45d9-a2d2-c6978d944e20",
+        "name": "SIPRI",
+        "tier": 2
+      },
+      {
+        "id": "4ac89079-a29a-4a3d-a54c-defb2119c929",
+        "name": "Synthetic research desk A",
+        "tier": 5
+      },
+      {
+        "id": "f4d4bfa4-2aa0-42c0-a800-efcdc8b6c425",
+        "name": "Synthetic research desk B",
+        "tier": 5
+      }
+    ],
+    "collection": "Development reference collection",
+    "review_writes": false,
+    "workspace_writes": true
+  }
+}

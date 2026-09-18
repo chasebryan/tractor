@@ -1,0 +1,51 @@
+{
+  "name": "high-profile",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "packageManager": "pnpm@11.19.0",
+  "scripts": {
+    "dev": "node --import tsx server/index.ts",
+    "build": "tsc --noEmit && vite build",
+    "start": "NODE_ENV=production node --import tsx server/index.ts",
+    "test": "vitest run",
+    "test:ui": "playwright test",
+    "test:production": "node tests/production-smoke.mjs",
+    "check": "pnpm build && pnpm test",
+    "db:audit": "node --import tsx server/audit-cli.ts",
+    "db:seed": "node --import tsx server/seed-cli.ts",
+    "format": "prettier --write src server tests *.ts *.json *.md",
+    "format:check": "prettier --check src server tests *.ts *.json *.md"
+  },
+  "dependencies": {
+    "@electric-sql/pglite": "^0.3.10",
+    "express": "^5.1.0",
+    "helmet": "^8.1.0",
+    "lucide-react": "^0.468.0",
+    "pg": "^8.16.3",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "react-router-dom": "^7.9.1",
+    "zod": "^4.1.8"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.10.2",
+    "@playwright/test": "^1.55.0",
+    "@types/express": "^5.0.3",
+    "@types/node": "^24.5.2",
+    "@types/pg": "^8.15.5",
+    "@types/react": "^19.1.13",
+    "@types/react-dom": "^19.1.9",
+    "@types/supertest": "^6.0.3",
+    "@vitejs/plugin-react": "^5.0.3",
+    "prettier": "^3.9.7",
+    "supertest": "^7.1.4",
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.2",
+    "vite": "^7.1.6",
+    "vitest": "^4.1.11"
+  }
+}

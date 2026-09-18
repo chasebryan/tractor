@@ -197,3 +197,7 @@ Deterministic tests block live HTTP and exercise provider contracts, pagination,
 Version 0.4 completes the Coverage milestone. Claim/entity intelligence is planned for 0.5; full-document/PDF extraction, timelines, refresh diffs and large-scale persistence are planned for 0.6. Translation integration, additional government/forum sources and signed installers remain deferred. Current adapters retrieve API records and onion search-index snippets; they do not crawl arbitrary result pages. Future crawlers must enforce robots policies and bound document parsing resources.
 
 License: [AGPL-3.0](LICENSE).
+
+## HIGH-PROFILE Index
+
+[HIGH-PROFILE](high-profile/README.md) is a standalone public-source nuclear-capabilities research application in this repository. It includes evidence-backed profiles, claim history, a Source Ledger and cited investigations. It has its own Node.js/PostgreSQL setup and does not depend on the TRACTOR desktop application. The discovery-provider interface allows a future integration.

@@ -1,0 +1,12 @@
+{
+  "ok": true,
+  "checks": [
+    "fresh production database and health",
+    "SPA deep link, production assets and CSP",
+    "seeded production search",
+    "nine data-integrity checks",
+    "private workspace and review authorization",
+    "authorized production workspace write and read",
+    "cross-origin write rejection"
+  ]
+}

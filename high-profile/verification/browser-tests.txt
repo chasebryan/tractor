@@ -1,0 +1,21 @@
+
+Running 12 tests using 1 worker
+
+(node:26897) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   1 [desktop] › tests/ui/research.spec.ts:3:1 › search → inspect → source, confidence and version history (6.1s)
+  ✓   2 [desktop] › tests/ui/research.spec.ts:47:1 › temporal reconstruction, contradictory and multilingual evidence (7.6s)
+  ✓   3 [desktop] › tests/ui/research.spec.ts:79:1 › source ledger, empty states and responsive navigation (5.0s)
+  ✓   4 [desktop] › tests/ui/research.spec.ts:110:1 › investigation saves exact versions and survives reload (10.1s)
+  ✓   5 [desktop] › tests/ui/research.spec.ts:140:1 › keyboard, accessibility and layout audit (7.2s)
+  ✓   6 [desktop] › tests/ui/research.spec.ts:160:1 › research pages and evidence inspector meet automated accessibility checks (28.7s)
+(node:27449) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   7 [mobile] › tests/ui/research.spec.ts:3:1 › search → inspect → source, confidence and version history (5.4s)
+  ✓   8 [mobile] › tests/ui/research.spec.ts:47:1 › temporal reconstruction, contradictory and multilingual evidence (7.8s)
+  ✓   9 [mobile] › tests/ui/research.spec.ts:79:1 › source ledger, empty states and responsive navigation (5.1s)
+  ✓  10 [mobile] › tests/ui/research.spec.ts:110:1 › investigation saves exact versions and survives reload (6.2s)
+  ✓  11 [mobile] › tests/ui/research.spec.ts:140:1 › keyboard, accessibility and layout audit (5.9s)
+  ✓  12 [mobile] › tests/ui/research.spec.ts:160:1 › research pages and evidence inspector meet automated accessibility checks (18.8s)
+
+  12 passed (2.0m)

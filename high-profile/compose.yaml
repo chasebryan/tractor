@@ -1,0 +1,28 @@
+services:
+  database:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: high_profile
+      POSTGRES_USER: high_profile
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}
+    volumes:
+      - database:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U high_profile"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+  app:
+    build: .
+    ports:
+      - "127.0.0.1:4310:4310"
+    environment:
+      DATABASE_URL: postgresql://high_profile:${POSTGRES_PASSWORD}@database:5432/high_profile
+      REVIEW_TOKEN: ${REVIEW_TOKEN:?Set REVIEW_TOKEN}
+      SEED_FIXTURES: ${SEED_FIXTURES:-false}
+      PUBLIC_ORIGIN: ${PUBLIC_ORIGIN:-http://localhost:4310}
+    depends_on:
+      database:
+        condition: service_healthy
+volumes:
+  database:

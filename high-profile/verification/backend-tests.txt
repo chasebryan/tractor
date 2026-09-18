@@ -1,0 +1,9 @@
+
+ RUN  v4.1.11 /home/cbryan/Documents/Codex/2026-09-17/files-pasted-by-the-user-high/outputs/high-profile
+
+
+ Test Files  1 passed (1)
+      Tests  37 passed (37)
+   Start at  19:48:45
+   Duration  44.44s (transform 1.43s, setup 0ms, import 3.56s, tests 38.65s, environment 0ms)
+
